@@ -2,9 +2,9 @@ import sqlalchemy.exc
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user
 
-from blueprints.registration.forms import CompanyRegisterForm, EmployeeRegisterForm
-from database.engine import db_session
+from app import db
 from database.models import Company, Employee
+from blueprints.registration.forms import CompanyRegisterForm, EmployeeRegisterForm
 
 blueprint = Blueprint('registration', __name__)
 
@@ -20,10 +20,10 @@ def registration_company():
             company = Company(company_name=form.name.data,
                               tax_id_number=form.tax_id_number.data,
                               company_email=form.email.data)
-            db_session.add(company)
-            db_session.commit()
+            db.session.add(company)
+            db.session.commit()
         except sqlalchemy.exc.IntegrityError:
-            db_session.rollback()
+            db.session.rollback()
             flash("This email or tax Id number is already exist", "danger")
             return render_template('registration/company.html', form=form)
 
@@ -39,7 +39,7 @@ def registration_employee():
         return redirect(url_for("login.login"))
     form = EmployeeRegisterForm(request.form)
     if form.validate_on_submit():
-        is_company_exist = db_session.query(Company).where(Company.tax_id_number == form.company_tax_id_number.data).first()
+        is_company_exist = Company.query.filter(Company.tax_id_number == form.company_tax_id_number.data).first()
         if not is_company_exist:
             flash("This company doesn't not exist.", "message")
             return render_template('registration/employee.html', form=form)
@@ -50,13 +50,13 @@ def registration_employee():
                                 email=form.email.data,
                                 password=form.password.data)
             employee.generate_password_hash(employee.password)
-            db_session.add(employee)
-            db_session.commit()
+            db.session.add(employee)
+            db.session.commit()
 
             flash("Your register complete. Please confirm email!", "success")
             return redirect(url_for("login.login"))
         except sqlalchemy.exc.IntegrityError:
-            db_session.rollback()
+            db.session.rollback()
             flash("User with this email is already exist", "danger")
             return render_template('registration/employee.html', form=form)
     return render_template('registration/employee.html', form=form)

@@ -2,60 +2,45 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from flask_login import UserMixin
 
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-
+from app import db
 
 password_hasher = PasswordHasher()
 
 
-class Base(DeclarativeBase):
-    pass
-
-
-class Company(Base):
+class Company(db.Model):
     __tablename__ = "companies"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    company_name: Mapped[str] = mapped_column(nullable=False)
-    tax_id_number: Mapped[int] = mapped_column(unique=True, nullable=False)
-    company_email: Mapped[str] = mapped_column(unique=True, nullable=False)
-    is_confirm: Mapped[bool] = mapped_column(nullable=False, default=False)
-
-    department: Mapped["Department"] = relationship(back_populates="company")
-    employee: Mapped["Employee"] = relationship(back_populates="company")
+    id = db.Column(db.Integer, primary_key=True)
+    company_name = db.Column(db.String, nullable=False)
+    tax_id_number = db.Column(db.String, unique=True, nullable=False)
+    company_email = db.Column(db.String, unique=True, nullable=False)
+    is_confirm = db.Column(db.Boolean, nullable=False, default=False)
 
     def __repr__(self):
         return f"<Company name {self.company_name}, email {self.company_email}>"
 
 
-class Department(Base):
+class Department(db.Model):
     __tablename__ = "departments"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
-    head_of_department_id: Mapped[int] = mapped_column(ForeignKey("employees.id"), nullable=True, default=None)
-    department_name: Mapped[str] = mapped_column(nullable=False)
-    describe_function: Mapped[str] = mapped_column(nullable=True)
-
-    company: Mapped["Company"] = relationship(back_populates="department", foreign_keys=[company_id])
-    employee: Mapped["Employee"] = relationship(foreign_keys=[head_of_department_id])
+    id = db.Column(db.Integer, primary_key=True)
+    company_id = db.Column(db.ForeignKey("companies.id"))
+    head_of_department_id = db.Column(db.Integer, db.ForeignKey("employees.id"), nullable=True, default=None)
+    department_name = db.Column(db.String, nullable=False)
+    describe_function = db.Column(db.String, nullable=True)
 
 
-class Employee(UserMixin, Base):
+class Employee(UserMixin, db.Model):
     __tablename__ = "employees"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
-    department_id: Mapped[int] = mapped_column(ForeignKey("departments.id"), nullable=True, default=None)
-    first_name: Mapped[str] = mapped_column(nullable=False)
-    last_name: Mapped[str] = mapped_column(nullable=False)
-    position: Mapped[str] = mapped_column(nullable=False, default="manager")
-    email: Mapped[str] = mapped_column(unique=True, nullable=False)
-    password: Mapped[str] = mapped_column(nullable=False)
-
-    company: Mapped["Company"] = relationship(back_populates="employee", foreign_keys=[company_id])
-    department: Mapped["Department"] = relationship(foreign_keys=[department_id])
+    id = db.Column(db.Integer, primary_key=True)
+    company_id = db.Column(db.ForeignKey("companies.id"))
+    department_id = db.Column(db.Integer, db.ForeignKey("departments.id"), nullable=True, default=None)
+    first_name = db.Column(db.String, nullable=False)
+    last_name = db.Column(db.String, nullable=False)
+    position = db.Column(db.String, nullable=False, default="manager")
+    email = db.Column(db.String, unique=True, nullable=False)
+    password = db.Column(db.String, nullable=False)
 
     def __repr__(self):
         return f"<User Id={self.id}, company-{self.company_id}>"
