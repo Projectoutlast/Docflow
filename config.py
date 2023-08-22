@@ -1,11 +1,5 @@
 from decouple import config
 
-from pathlib import Path
-
-basedir = Path().cwd()
-
-test = "sqlite:///" + str(basedir) + "/docflow.db"
-
 DATABASE_URI = config("DATABASE_URL")
 if DATABASE_URI.startswith("postgres://"):
     DATABASE_URI = DATABASE_URI.replace("postgres://", "postgresql://", 1)
@@ -15,7 +9,7 @@ class Config:
     DEBUG = False
     TESTING = False
     CSRF_ENABLED = True
-    SECRET_KEY = config("SECRET_KEY")
+    SECRET_KEY = config("SECRET_KEY", default="guess-me")
     SQLALCHEMY_DATABASE_URI = DATABASE_URI
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_ENABLED = True
@@ -37,7 +31,7 @@ class Development(Config):
 class Testing(Config):
     TESTING = True
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = config("TEST_DATABASE_URL")
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     WTF_CSRF_ENABLED = False
 
 

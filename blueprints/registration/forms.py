@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import EmailField, IntegerField, PasswordField, StringField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 
-from database.engine import session
+from database.engine import db_session
 from database.models import Company, Employee
 
 
@@ -16,7 +16,7 @@ class CompanyRegisterForm(FlaskForm):
         initial_validation = super(CompanyRegisterForm, self).validate()
         if not initial_validation:
             return False
-        company = session.query(Company).where(Company.company_email == self.email.data).first()
+        company = db_session.query(Company).where(Company.company_email == self.email.data).first()
         if company:
             self.email.errors.append("Email already registered")
             return False
@@ -37,7 +37,7 @@ class EmployeeRegisterForm(FlaskForm):
         initial_validation = super(EmployeeRegisterForm, self).validate()
         if not initial_validation:
             return False
-        employee = session.query(Employee).where(Employee.email == self.email.data).first()
+        employee = db_session.query(Employee).where(Employee.email == self.email.data).first()
         if employee:
             self.email.errors.append("Email already registered")
             return False
