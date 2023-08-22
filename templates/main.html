@@ -1,0 +1,22 @@
+{% extends "base_index.html" %}
+{% block content %}
+<div class="row">
+    <div class="row">
+        <h2>Welcome to Docflow</h2>
+        <p>Managing documents for small business</p>
+        <br>
+    </div>
+</div>
+<br>
+<div class="row">
+    <div class="col">
+        <p>Register for</p>
+        <a class="btn btn-outline-warning btn-sm" href="{{ url_for('registration.registration_company') }}">Company</a>
+        <a type="button" class="btn btn-outline-warning btn-sm" href="{{ url_for('registration.registration_employee') }}">Employee</a>
+    </div>
+    <div class="col">
+        <p>Or</p>
+        <a type="button" class="btn btn-outline-light btn-sm" href="{{ url_for('login.login') }}">Log In</a>
+    </div>
+</div>
+{% endblock %}

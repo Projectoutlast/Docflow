@@ -1,0 +1,32 @@
+{% extends "base_index.html" %}
+{% block content %}
+<p>Log in</p>
+<form role="form" method="post">
+
+    {{ form.csrf_token }}
+
+    {{ form.email(placeholder="Email", class="form-control") }}
+    {% if form.email.errors %}
+    {% for error in form.email.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    <br>
+
+    {{ form.password(placeholder="Password", class="form-control") }}
+    {% if form.password.errors %}
+    {% for error in form.password.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    <br>
+
+    <button class="btn btn-outline-warning btn-sm" type="submit">Log in</button>
+    <a href="{{ url_for('main.index') }}" class="btn btn-outline-light btn-sm">Home</a>
+
+</form>
+{% endblock %}
