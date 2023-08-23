@@ -1,8 +1,8 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user, login_required
 
-from database.models import Employee
-from blueprints.authentication.form import LoginForm
+from web_app.database.models import Employee
+from web_app.blueprints.authentication.form import LoginForm
 
 
 blueprint = Blueprint('login', __name__)

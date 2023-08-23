@@ -2,9 +2,9 @@ import sqlalchemy.exc
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user
 
-from app import db
-from database.models import Company, Employee
-from blueprints.registration.forms import CompanyRegisterForm, EmployeeRegisterForm
+from web_app.database.db import db
+from web_app.database.models import Company, Employee
+from web_app.blueprints.registration.forms import CompanyRegisterForm, EmployeeRegisterForm
 
 blueprint = Blueprint('registration', __name__)
 

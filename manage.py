@@ -1,10 +1,11 @@
 import unittest
 
-from flask import Flask
 from flask.cli import FlaskGroup
 
-app = Flask(__name__)
-cli = FlaskGroup(app)
+from web_app import flask_app
+
+
+cli = FlaskGroup(flask_app)
 
 
 @cli.command("test")

@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import EmailField, IntegerField, PasswordField, StringField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 
-from database.models import Company, Employee
+from web_app.database.models import Company, Employee
 
 
 class CompanyRegisterForm(FlaskForm):

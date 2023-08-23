@@ -2,7 +2,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from flask_login import UserMixin
 
-from app import db
+from web_app.database.db import db
 
 password_hasher = PasswordHasher()
 
@@ -12,7 +12,7 @@ class Company(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     company_name = db.Column(db.String, nullable=False)
-    tax_id_number = db.Column(db.String, unique=True, nullable=False)
+    tax_id_number = db.Column(db.Integer, unique=True, nullable=False)
     company_email = db.Column(db.String, unique=True, nullable=False)
     is_confirm = db.Column(db.Boolean, nullable=False, default=False)
 
@@ -30,11 +30,11 @@ class Department(db.Model):
     describe_function = db.Column(db.String, nullable=True)
 
 
-class Employee(UserMixin, db.Model):
+class Employee(db.Model, UserMixin):
     __tablename__ = "employees"
 
     id = db.Column(db.Integer, primary_key=True)
-    company_id = db.Column(db.ForeignKey("companies.id"))
+    company_id = db.Column(db.Integer, db.ForeignKey("companies.id"))
     department_id = db.Column(db.Integer, db.ForeignKey("departments.id"), nullable=True, default=None)
     first_name = db.Column(db.String, nullable=False)
     last_name = db.Column(db.String, nullable=False)

@@ -2,7 +2,7 @@ from decouple import config
 
 from flask import Flask
 from flask_login import LoginManager
-from database.db import db
+from web_app.database.db import db
 
 
 def create_app() -> Flask:
@@ -13,16 +13,16 @@ def create_app() -> Flask:
 
     db.init_app(app)
     with app.app_context():
-        from database.models import Company, Department, Employee
+        from web_app.database.models import Company, Department, Employee
         db.create_all()
 
     login_manager = LoginManager()
     login_manager.init_app(app)
 
-    from blueprints.main.main_views import blueprint as main_blueprint
-    from blueprints.registration.registration_views import blueprint as registration_blueprint
-    from blueprints.authentication.authentication_views import blueprint as authentication_blueprint
-    from blueprints.work.work_views import blueprint as work_blueprint
+    from web_app.blueprints.main.main_views import blueprint as main_blueprint
+    from web_app.blueprints.registration.registration_views import blueprint as registration_blueprint
+    from web_app.blueprints.authentication.authentication_views import blueprint as authentication_blueprint
+    from web_app.blueprints.work.work_views import blueprint as work_blueprint
 
     app.register_blueprint(main_blueprint)
     app.register_blueprint(registration_blueprint)
@@ -31,7 +31,7 @@ def create_app() -> Flask:
 
     login_manager.login_view = "login"
 
-    from database.models import Employee
+    from web_app.database.models import Employee
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -40,5 +40,4 @@ def create_app() -> Flask:
     return app
 
 
-if __name__ == '__main__':
-    create_app().run(debug=True, port=4242)
+flask_app = create_app()
