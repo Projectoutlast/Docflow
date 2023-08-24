@@ -1,46 +1,49 @@
-from decouple import config
-
-from pathlib import Path
-
-basedir = Path().cwd()
-
-test = "sqlite:///" + str(basedir) + "/docflow.db"
-
-DATABASE_URI = config("DATABASE_URL")
-if DATABASE_URI.startswith("postgres://"):
-    DATABASE_URI = DATABASE_URI.replace("postgres://", "postgresql://", 1)
+import os
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
-    DEBUG = False
-    TESTING = False
-    CSRF_ENABLED = True
-    SECRET_KEY = config("SECRET_KEY")
-    SQLALCHEMY_DATABASE_URI = DATABASE_URI
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in \
+        ['true', 'on', '1']
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    SSL_REDIRECT = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    WTF_CSRF_ENABLED = True
-    DEBUG_TB_ENABLED = False
-    DEBUG_TB_INTERCEPT_REDIRECTS = False
-    EMAIL_ACCOUNT = config("EMAIL_ACCOUNT")
-    EMAIL_PASSWORD = config("EMAIL_PASSWORD")
-    HOST = config("HOST")
-    PORT = config("PORT")
+    SQLALCHEMY_RECORD_QUERIES = True
+
+    @staticmethod
+    def init_app(app):
+        pass
 
 
-class Development(Config):
-    DEVELOPMENT = True
+class DevelopmentConfig(Config):
     DEBUG = True
-    WTF_CSRF_ENABLED = False
-    DEBUG_TB_ENABLED = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
+        'sqlite:///' + os.path.join(basedir, 'data-dev.sqlite')
 
 
-class Testing(Config):
+class TestingConfig(Config):
     TESTING = True
-    DEBUG = True
-    SQLALCHEMY_DATABASE_URI = config("TEST_DATABASE_URL")
+    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
+        'sqlite://'
     WTF_CSRF_ENABLED = False
 
 
-class Production(Config):
-    DEBUG = False
-    DEBUG_TB_ENABLED = False
+class ProductionConfig(Config):
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+
+    @classmethod
+    def init_app(cls, app):
+        Config.init_app(app)
+
+
+config = {
+    'development': DevelopmentConfig,
+    'testing': TestingConfig,
+    'production': ProductionConfig,
+    'default': DevelopmentConfig
+}

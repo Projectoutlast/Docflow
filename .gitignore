@@ -2,5 +2,5 @@ config.py
 __pycache__
 .db
 venv/
-.env
-
+*.env
+.pytest_cache
