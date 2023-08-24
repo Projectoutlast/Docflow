@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import EmailField, IntegerField, PasswordField, StringField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 
-from web_app.database.models import Company, Employee
+from web_app.models import Company, Employee
 
 
 class CompanyRegisterForm(FlaskForm):
@@ -39,8 +39,5 @@ class EmployeeRegisterForm(FlaskForm):
         employee = Employee.query.filter(Employee.email == self.email.data).first()
         if employee:
             self.email.errors.append("Email already registered")
-            return False
-        if self.password.data != self.confirm.data:
-            self.email.errors.append("Passwords must match")
             return False
         return True

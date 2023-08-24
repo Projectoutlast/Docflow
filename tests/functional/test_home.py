@@ -5,7 +5,7 @@ def test_home_page(test_client):
     THEN check that the response is valid / invalid
     """
 
-    response = test_client.get("/")
+    response = test_client.get("/", follow_redirects=True)
     assert response.status_code == 200
     assert b"Docflow" in response.data
     assert b"Welcome to Docflow" in response.data

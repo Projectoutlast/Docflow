@@ -2,7 +2,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from flask_login import UserMixin
 
-from web_app.database.db import db
+from web_app import db
 
 password_hasher = PasswordHasher()
 
@@ -24,7 +24,7 @@ class Department(db.Model):
     __tablename__ = "departments"
 
     id = db.Column(db.Integer, primary_key=True)
-    company_id = db.Column(db.ForeignKey("companies.id"))
+    company_id = db.Column(db.Integer, db.ForeignKey("companies.id"))
     head_of_department_id = db.Column(db.Integer, db.ForeignKey("employees.id"), nullable=True, default=None)
     department_name = db.Column(db.String, nullable=False)
     describe_function = db.Column(db.String, nullable=True)

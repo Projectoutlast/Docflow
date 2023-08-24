@@ -1,3 +1,22 @@
+import pytest
+
+from web_app.models import Company, Employee
+
+
+@pytest.fixture
+def new_company():
+    """Create new Company instance"""
+    company = Company(company_name="Smart", tax_id_number=453380, company_email="smart@example.com")
+    return company
+
+
+@pytest.fixture
+def new_employee():
+    """Create new Employee instance"""
+    employee = Employee(
+        first_name="Jack", last_name="Sparrow", email="jack@example.com", password="test")  # type: ignore
+    employee.generate_password_hash("test")
+    return employee
 
 
 def test_new_company(new_company):
@@ -19,6 +38,7 @@ def test_new_employee(new_employee):
     defined correctly
     """
     assert new_employee.check_password_hash("test") is True
+    assert new_employee.check_password_hash("sdfsdfdsfsdf") is False
     assert new_employee.password != "test"
     assert new_employee.first_name == "Jack"
     assert new_employee.last_name == "Sparrow"

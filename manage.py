@@ -1,23 +1,19 @@
-import unittest
-
-from flask.cli import FlaskGroup
-
-from web_app import flask_app
+import os
+from dotenv import load_dotenv
 
 
-cli = FlaskGroup(flask_app)
+dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
+if os.path.exists(dotenv_path):
+    load_dotenv(dotenv_path)
 
 
-@cli.command("test")
-def test():
-    """Runs the unit tests without coverage."""
-    tests = unittest.TestLoader().discover("tests")
-    result = unittest.TextTestRunner(verbosity=2).run(tests)
-    if result.wasSuccessful():
-        return 0
-    else:
-        return 1
+from flask_migrate import Migrate
+from web_app import create_app, db
+
+
+app = create_app(os.getenv("FLASK_CONFIG") or "default")
+migrate = Migrate(app, db)
 
 
 if __name__ == "__main__":
-    cli()
+    app.run()
