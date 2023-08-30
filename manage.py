@@ -7,12 +7,10 @@ if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
 
 
-from flask_migrate import Migrate
-from web_app import create_app, db
+from web_app import create_app
 
 
 app = create_app(os.getenv("FLASK_CONFIG") or "default")
-migrate = Migrate(app, db)
 
 
 if __name__ == "__main__":

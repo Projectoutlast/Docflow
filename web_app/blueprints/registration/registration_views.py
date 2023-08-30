@@ -27,7 +27,7 @@ def registration_company():
             return render_template('registration/company.html', form=form), 409
 
         flash("Your company registered. Please confirm your email", "message")
-        return redirect(url_for("login.login"))
+        return redirect(url_for("main.index"))
     return render_template('registration/company.html', form=form)
 
 

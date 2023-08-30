@@ -27,7 +27,7 @@ def test_registration_company_page(test_client):
     response = test_client.post("/company", data=payload, follow_redirects=True)
     new_company = Company.query.filter(Company.company_email == "romashka@example.com").first()
     assert response.status_code == 200
-    assert b"Log in" in response.data
+    assert b"Docflow" in response.data
     assert new_company.company_name == "Romashka"
 
     response = test_client.post("/company", data=payload, follow_redirects=True)
