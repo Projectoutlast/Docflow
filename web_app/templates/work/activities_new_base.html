@@ -1,0 +1,38 @@
+{% extends "base_workspace.html" %}
+{% block content %}
+<div class="row">
+    <div class="col"></div>
+    <div class="col">
+        <a class="nav-link" href="{{ url_for('work.activities_new_call') }}">
+            <img src="/static/images/activities_call.jpg" alt=" ">
+            Call
+        </a>
+    </div>
+    <div class="col">
+        <a class="nav-link" href="{{ url_for('work.activities_new_meeting') }}">
+            <img src="/static/images/activities_meeting.jpg" alt=" ">
+            Meeting
+        </a>
+    </div>
+    <div class="col">
+        <a class="nav-link" href="{{ url_for('work.activities_new_task') }}">
+            <img src="/static/images/activities_task.jpg" alt=" ">
+            Task
+        </a>
+    </div>
+    <div class="col-7"></div>
+</div>
+<br>
+{% block activities %}{% endblock %}
+<br>
+<div class="row">
+    <div class="col"></div>
+    <div class="col-3">
+        <button type="button" class="btn btn-outline-primary btn-sm">Create</button>
+    </div>
+    <div class="col"></div>
+    <div class="col"></div>
+    <div class="col"></div>
+    <div class="col-4"></div>
+</div>
+{% endblock %}

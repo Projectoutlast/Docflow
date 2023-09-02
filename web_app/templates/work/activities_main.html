@@ -1,0 +1,71 @@
+{% extends "base_workspace.html" %}
+{% block content %}
+<div class="row">
+    <div class="col"></div>
+    <div class="col text-center">
+        <button type="button" class="btn btn-outline-primary btn-sm">
+            <a class="nav-link" href="{{ url_for('work.activities_new_call') }}">New activity</a>
+        </button>
+    </div>
+    <div class="col text-center">
+        <button type="button" class="btn btn-outline-success btn-sm">Completed</button>
+    </div>
+    <div class="col text-center">
+        <button type="button" class="btn btn-outline-warning btn-sm">In progress</button>
+    </div>
+    <div class="col text-center">
+        <button type="button" class="btn btn-outline-danger btn-sm">Overdue</button>
+    </div>
+    <div class="col"></div>
+</div>
+<br>
+<div class="row">
+    <div class="col">
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">№</th>
+                <th scope="col">Subject</th>
+                <th scope="col">Kind</th>
+                <th scope="col">Activity holder</th>
+                <th scope="col">Executor</th>
+                <th scope="col">Appointed</th>
+                <th scope="col">Finish untill</th>
+                <th scope="col">Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <th scope="row">1</th>
+                <td>Mark</td>
+                <td>Otto</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+            </tr>
+            <tr>
+                <th scope="row">2</th>
+                <td>Jacob</td>
+                <td>Thornton</td>
+                <td>@fat</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+            </tr>
+            <tr>
+                <th scope="row">3</th>
+                <td colspan="2">Larry the Bird</td>
+                <td>@twitter</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+                <td>@mdo</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -22,7 +22,7 @@
                                 <div class="collapse navbar-collapse" id="navbarNav">
                                     <ul class="navbar-nav">
                                         <li class="nav-item">
-                                            <a class="nav-link active text-white" aria-current="page" href="#">Tasks</a>
+                                            <a class="nav-link active text-white" aria-current="page" href="{{ url_for('work.activities_all') }}">Activities</a>
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link text-white" href="#">Contracts</a>
@@ -51,10 +51,20 @@
             </div>
         </div>
         <br>
-        <!-- messages -->
-        {% include('messages.html') %}
+        <div class="row">
+            <div class="col"></div>
+            <div class="col">
+                <!-- messages -->
+                {% include('messages.html') %}
+            </div>
+            <div class="col"></div>
+        </div>
+        <div class="row">
+            <div class="col">
         <!-- child template -->
         {% block content %}{% endblock %}
+            </div>
+        </div>
     </div>
     <!-- scripts -->
     <!-- JavaScript Bundle with Popper -->
