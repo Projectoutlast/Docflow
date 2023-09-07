@@ -1,6 +1,6 @@
 def test_register_forms(test_client):
     """
-    GET a CompanyRegisterForm
+    GET CompanyRegisterForm and EmployeeRegisterForm
     THEN check that the form work correctly
     """
     from web_app.blueprints.registration.forms import CompanyRegisterForm, EmployeeRegisterForm

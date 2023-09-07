@@ -1,7 +1,10 @@
+import datetime
+
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from flask_login import UserMixin
 
+from web_app.enums import ActivityStatus
 from web_app import db
 
 password_hasher = PasswordHasher()
@@ -54,3 +57,53 @@ class Employee(db.Model, UserMixin):
             return True
         except VerifyMismatchError:
             return False
+
+
+class CallActivity(db.Model):
+    __tablename__ = "call_activities"
+
+    id = db.Column(db.Integer, primary_key=True)
+    company_id = db.Column(db.Integer, db.ForeignKey("companies.id"), nullable=False)
+    to_whom = db.Column(db.String, nullable=False)
+    activity_holder = db.Column(db.Integer, db.ForeignKey("employees.id"), nullable=False)
+    executor = db.Column(db.Integer, db.ForeignKey("employees.id"), nullable=False)
+    appointed = db.Column(db.DateTime, default=datetime.datetime.now())
+    finish_until = db.Column(db.DateTime, nullable=False)
+    status = db.Column(db.Enum(ActivityStatus), default=ActivityStatus.IN_PROGRESS, nullable=False)
+
+    def __repr__(self):
+        return f"<Id={self.id}, activity_holder={self.activity_holder}>"
+
+
+class MeetingActivity(db.Model):
+    __tablename__ = "meeting_activities"
+
+    id = db.Column(db.Integer, primary_key=True)
+    company_id = db.Column(db.Integer, db.ForeignKey("companies.id"), nullable=False)
+    with_whom = db.Column(db.String, nullable=False)
+    location = db.Column(db.String, nullable=False)
+    activity_holder = db.Column(db.Integer, db.ForeignKey("employees.id"), nullable=False)
+    executor = db.Column(db.Integer, db.ForeignKey("employees.id"), nullable=False)
+    appointed = db.Column(db.DateTime, default=datetime.datetime.now())
+    finish_until = db.Column(db.DateTime, nullable=False)
+    status = db.Column(db.Enum(ActivityStatus), default=ActivityStatus.IN_PROGRESS, nullable=False)
+
+    def __repr__(self):
+        return f"<Id={self.id}, activity_holder={self.activity_holder}>"
+
+
+class TaskActivity(db.Model):
+    __tablename__ = "task_activities"
+
+    id = db.Column(db.Integer, primary_key=True)
+    company_id = db.Column(db.Integer, db.ForeignKey("companies.id"), nullable=False)
+    subject = db.Column(db.String, nullable=False)
+    describe = db.Column(db.String, nullable=False)
+    activity_holder = db.Column(db.Integer, db.ForeignKey("employees.id"), nullable=False)
+    executor = db.Column(db.Integer, db.ForeignKey("employees.id"), nullable=False)
+    appointed = db.Column(db.DateTime, default=datetime.datetime.now())
+    finish_until = db.Column(db.DateTime, nullable=False)
+    status = db.Column(db.Enum(ActivityStatus), default=ActivityStatus.IN_PROGRESS, nullable=False)
+
+    def __repr__(self):
+        return f"<Id={self.id}, activity_holder={self.activity_holder}>"

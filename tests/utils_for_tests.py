@@ -1,10 +1,15 @@
+import datetime
 import sqlalchemy.exc
+
 from faker import Faker
 
 from web_app.models import Company, Employee
 from web_app import db
 
 fake = Faker()
+
+TEST_DATE_WHEN = datetime.date(2024, 12, 31)
+TEST_TIME_WHEN = datetime.time(12, 0, 0)
 
 
 def generate_new_company() -> list:
@@ -41,11 +46,6 @@ def generate_new_employee() -> list:
     try:
         db.session.add_all(result)
         db.session.commit()
-    except:
+    except sqlalchemy.exc.IntegrityError:
         db.session.rollback()
     return result
-
-
-print(generate_new_company())
-print(generate_new_employee())
-

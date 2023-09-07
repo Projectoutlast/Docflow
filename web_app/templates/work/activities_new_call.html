@@ -1,40 +1,47 @@
 {% extends "work/activities_new_base.html" %}
 {% block activities %}
-<div class="row">
-    <div class="col"></div>
-    <div class="col-3">
-        <input class="form-control" type="text" placeholder="To whom" aria-label="default input example">
-    </div>
-    <div class="col"></div>
-    <div class="col">
-        <div class="dropdown">
-            <button class="btn btn-secondary bg-white text-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" >
-                Executor
-            </button>
-            <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Action</a></li>
-            </ul>
+<form role="form" method="post" action="{{ url_for('work.activities_new_call') }}">
+    {{ form.csrf_token }}
+    <div class="row">
+        <div class="col"></div>
+        <div class="col-3">
+            {{ form.to_whom(placeholder="To whom", class="form-control") }}
+            {% if form.to_whom.errors %}
+            <br>
+            {% for error in form.to_whom.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            <br>
+            {{ form.when_date.label() }}
+            {{ form.when_date(class="form-control type=text aria-label=default input example") }}
+            <br>
+            {{ form.when_time.label() }}
+            {{ form.when_time(class="form-control type=text aria-label=default input example") }}
+            <br>
+            {{ form.submit() }}
         </div>
-    </div>
-    <div class="col">
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="">
+        <div class="col"></div>
+        <div class="col">
+            {{ form.executor(placeholder="Executor") }}
+            {% if form.to_whom.errors %}
+            <br>
+            {% for error in form.to_whom.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        <div class="col">
+                {{ form.myself(class="form-check-input type=checkbox") }}
                 Myself
         </div>
+        <div class="col-4">
+        </div>
     </div>
-    <div class="col-4">
-    </div>
-</div>
-<br>
-<div class="row">
-    <div class="col"></div>
-    <div class="col-3">
-        <input class="form-control" type="text" placeholder="Here will be datepicker from flask-wtf-form" aria-label="default input example">
-    </div>
-    <div class="col"></div>
-    <div class="col"></div>
-    <div class="col"></div>
-    <div class="col-4">
-    </div>
-</div>
+    <br>
+</form>
 {% endblock %}

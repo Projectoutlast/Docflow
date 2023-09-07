@@ -1,8 +1,10 @@
+import os
+
 from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
-from config import config
+from config import basedir, config
 
 
 db = SQLAlchemy()
@@ -17,10 +19,19 @@ def create_app(config_name: str) -> Flask:
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
+    if os.path.exists(basedir + "docflow.db"):
+        os.remove(basedir + "docflow.db")
+        print("Data base SQLite was deleted")
+
     db.init_app(app)
     with app.app_context():
-        from web_app.models import Company, Department, Employee
+        db.drop_all()
+        from web_app.models import CallActivity, Company, Department, Employee
         db.create_all()
+        from tests.utils_for_tests import generate_new_company, generate_new_employee
+        generate_new_company()
+        generate_new_employee()
+        print("New database created")
 
     login_manager.init_app(app)
 
@@ -33,7 +44,7 @@ def create_app(config_name: str) -> Flask:
     from web_app.blueprints.authentication.authentication_views import blueprint as authentication_blueprint
     app.register_blueprint(authentication_blueprint)
 
-    from web_app.blueprints.work.work_views import blueprint as work_blueprint
+    from web_app.blueprints.work.activity.views import blueprint as work_blueprint
     app.register_blueprint(work_blueprint)
 
     from web_app.models import Employee

@@ -1,5 +1,7 @@
 import os
-basedir = os.path.abspath(os.path.dirname(__file__))
+import pathlib as pt
+
+basedir = str(pt.Path.cwd())
 
 
 class Config:
