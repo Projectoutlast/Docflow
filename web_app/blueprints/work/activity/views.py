@@ -21,7 +21,11 @@ def home_workspace():
 @blueprint.route("/activities/all", methods=["GET"])
 @login_required
 def activities_all():
-    return render_template("work/activities_main.html")
+    all_calls = CallActivity.query.filter(Employee.id == current_user.id).all()
+    all_meetings = MeetingActivity.query.filter(Employee.id == current_user.id).all()
+    all_tasks = TaskActivity.query.filter(Employee.id == current_user.id).all()
+    activities = [*all_calls, *all_meetings, *all_tasks]
+    return render_template("work/activities_main.html", activities=activities)
 
 
 @blueprint.route("/activities/new/call", methods=["GET", "POST"])
@@ -31,12 +35,15 @@ def activities_new_call():
     form.executor.choices = get_all_executors(current_user.id)
     if form.validate_on_submit():
         employee = Employee.query.filter(Employee.id == current_user.id).first()
+        executor = Employee.query.filter(Employee.id == get_executor(form)).first()
         if employee:
             try:
                 new_call = CallActivity(company_id=employee.company_id,
                                         to_whom=form.to_whom.data,
                                         activity_holder=current_user.id,
+                                        activity_holder_name=f"{employee.first_name} {employee.last_name}",
                                         executor=get_executor(form),
+                                        executor_name=f"{executor.first_name} {executor.last_name}",
                                         finish_until=combine_date_time(form.when_date.data, form.when_time.data))
                 db.session.add(new_call)
                 db.session.commit()
@@ -57,13 +64,16 @@ def activities_new_meeting():
     form.executor.choices = get_all_executors(current_user.id)
     if form.validate_on_submit():
         employee = Employee.query.filter(Employee.id == current_user.id).first()
+        executor = Employee.query.filter(Employee.id == get_executor(form)).first()
         if employee:
             try:
                 new_meeting = MeetingActivity(company_id=employee.company_id,
                                               activity_holder=current_user.id,
+                                              activity_holder_name=f"{employee.first_name} {employee.last_name}",
                                               with_whom=form.with_whom.data,
                                               location=form.location.data,
                                               executor=get_executor(form),
+                                              executor_name=f"{executor.first_name} {executor.last_name}",
                                               finish_until=combine_date_time(form.when_date.data, form.when_time.data))
                 db.session.add(new_meeting)
                 db.session.commit()
@@ -84,13 +94,16 @@ def activities_new_task():
     form.executor.choices = get_all_executors(current_user.id)
     if form.validate_on_submit():
         employee = Employee.query.filter(Employee.id == current_user.id).first()
+        executor = Employee.query.filter(Employee.id == get_executor(form)).first()
         if employee:
             try:
                 new_meeting = TaskActivity(company_id=employee.company_id,
                                            subject=form.subject.data,
                                            describe=form.describe.data,
                                            activity_holder=current_user.id,
+                                           activity_holder_name=f"{employee.first_name} {employee.last_name}",
                                            executor=get_executor(form),
+                                           executor_name=f"{executor.first_name} {executor.last_name}",
                                            finish_until=combine_date_time(form.when_date.data, form.when_time.data))
                 db.session.add(new_meeting)
                 db.session.commit()
@@ -102,3 +115,21 @@ def activities_new_task():
                 flash("Invalid data was passed, try again!", "danger")
                 return render_template("work/activities_new_task.html", form=form), 500
     return render_template("work/activities_new_task.html", form=form)
+
+
+@blueprint.route("/activities/complete/<int:activities_id>", methods=["POST", "GET"])
+@login_required
+def activities_complete(activities_id: int):
+    return redirect(url_for("work.activities_all"))
+
+
+@blueprint.route("/activities/cancel/<int:activities_id>", methods=["POST", "GET"])
+@login_required
+def activities_cancel(activities_id: int):
+    return redirect(url_for("work.activities_all"))
+
+
+@blueprint.route("/activities/extend-date/<int:activities_id>", methods=["POST", "GET"])
+@login_required
+def activities_extend(activities_id: int):
+    return redirect(url_for("work.activities_all"))

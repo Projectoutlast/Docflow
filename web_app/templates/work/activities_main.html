@@ -21,49 +21,37 @@
 <br>
 <div class="row">
     <div class="col">
-        <table class="table">
+        <table class="table text-center">
             <thead>
             <tr>
-                <th scope="col">№</th>
-                <th scope="col">Subject</th>
                 <th scope="col">Kind</th>
                 <th scope="col">Activity holder</th>
                 <th scope="col">Executor</th>
                 <th scope="col">Appointed</th>
-                <th scope="col">Finish untill</th>
+                <th scope="col">Finish until</th>
                 <th scope="col">Status</th>
+                <th scope="col">Actions</th>
             </tr>
             </thead>
             <tbody>
+            {% for activity in activities %}
             <tr>
-                <th scope="row">1</th>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
-                <td>@mdo</td>
-                <td>@mdo</td>
-                <td>@mdo</td>
-                <td>@mdo</td>
+                <td>{{ activity.type_of.value }}</td>
+                <td>{{ activity.activity_holder_name }}</td>
+                <td>{{ activity.executor_name }}</td>
+                <td>{{ activity.appointed.strftime("%m-%d-%Y %H:%M:%S") }}</td>
+                <td>{{ activity.finish_until.strftime("%m-%d-%Y %H:%M") }}</td>
+                <td>{{ activity.status.value }}</td>
+                <td>
+                    <a class="nav-link" href="{{ url_for('work.activities_complete',
+                                                 activities_id=activity.id) }}">Complete</a>
+                    <a class="nav-link" href="{{ url_for('work.activities_cancel',
+                                                 activities_id=activity.id) }}">Cancel</a>
+                    <a class="nav-link" href="{{ url_for('work.activities_extend',
+                                                 activities_id=activity.id) }}">Extend</a>
+                </td>
             </tr>
-            <tr>
-                <th scope="row">2</th>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-                <td>@mdo</td>
-                <td>@mdo</td>
-                <td>@mdo</td>
-                <td>@mdo</td>
-            </tr>
-            <tr>
-                <th scope="row">3</th>
-                <td colspan="2">Larry the Bird</td>
-                <td>@twitter</td>
-                <td>@mdo</td>
-                <td>@mdo</td>
-                <td>@mdo</td>
-                <td>@mdo</td>
-            </tr>
+            {% endfor %}
             </tbody>
         </table>
     </div>

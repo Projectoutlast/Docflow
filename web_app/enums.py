@@ -1,10 +1,10 @@
 import enum
 
 
-# class TypeOfActivity(enum.Enum):
-#     CALL = "call"
-#     MEETING = "meeting"
-#     TASK = "task"
+class TypeOfActivity(enum.Enum):
+    CALL = "call"
+    MEETING = "meeting"
+    TASK = "task"
 
 
 class ActivityStatus(enum.Enum):
