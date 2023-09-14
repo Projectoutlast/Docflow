@@ -35,10 +35,11 @@ def test_auth_client():
         # Establish an application context
         with flask_app.app_context():
             # Generate test data
-            from tests.utils_for_tests import generate_new_company, generate_new_employee
+            from tests.utils_for_tests import generate_activities, generate_new_company, generate_new_employee
 
             generate_new_company()
             generate_new_employee()
+            generate_activities()
 
             payload = {"email": "john@example.com", "password": "123456"}
             response = testing_client.post("/login", data=payload, follow_redirects=True)

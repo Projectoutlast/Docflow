@@ -19,19 +19,17 @@ def create_app(config_name: str) -> Flask:
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
-    if os.path.exists(basedir + "docflow.db"):
-        os.remove(basedir + "docflow.db")
-        print("Data base SQLite was deleted")
+    if os.path.exists(basedir + "/docflow.db"):
+        os.remove(basedir + "/docflow.db")
 
     db.init_app(app)
     with app.app_context():
-        db.drop_all()
         from web_app.models import CallActivity, Company, Department, Employee
         db.create_all()
-        from tests.utils_for_tests import generate_new_company, generate_new_employee
+        from tests.utils_for_tests import generate_activities, generate_new_company, generate_new_employee
         generate_new_company()
         generate_new_employee()
-        print("New database created")
+        generate_activities()
 
     login_manager.init_app(app)
 

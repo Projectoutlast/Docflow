@@ -35,6 +35,9 @@ def test_activities_form(test_auth_client):
    THEN check that all activities form work correct
    """
 
+    response = test_auth_client.get("/activities/all", follow_redirects=True)
+    assert b"Teresa May" and b"Mr Andersen" and b"Agent Smith" in response.data
+
     call_payload = {"to_whom": "Mr. Smith",
                     "when_date": TEST_DATE_WHEN,
                     "when_time": TEST_TIME_WHEN.strftime("%H:%M"),
@@ -64,7 +67,7 @@ def test_activities_form(test_auth_client):
                     "describe": "Need to get information from analytic department",
                     "when_date": TEST_DATE_WHEN,
                     "when_time": TEST_TIME_WHEN.strftime("%H:%M"),
-                    "executor": 10,
+                    "executor": 12,
                     "myself": True}
     response = test_auth_client.post("/activities/new/task", data=task_payload, follow_redirects=True)
     task = TaskActivity.query.filter(TaskActivity.subject == "Month Report").first()
