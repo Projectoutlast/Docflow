@@ -1,8 +1,11 @@
+import enum
+
 import sqlalchemy.exc
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from web_app import db
+from web_app.enums import ActivityStatus, TypeOfActivity
 from web_app.models import CallActivity, Employee, MeetingActivity, TaskActivity
 from web_app.blueprints.work.activity.forms import (combine_date_time, get_all_executors, get_executor,
                                                     NewActivityCall, NewActivityMeeting, NewActivityTask)
@@ -21,9 +24,12 @@ def home_workspace():
 @blueprint.route("/activities/all", methods=["GET"])
 @login_required
 def activities_all():
-    all_calls = CallActivity.query.filter(Employee.id == current_user.id).all()
-    all_meetings = MeetingActivity.query.filter(Employee.id == current_user.id).all()
-    all_tasks = TaskActivity.query.filter(Employee.id == current_user.id).all()
+    all_calls = CallActivity.query.filter(CallActivity.activity_holder == current_user.id,
+                                          CallActivity.status == ActivityStatus.IN_PROGRESS).all()
+    all_meetings = MeetingActivity.query.filter(MeetingActivity.activity_holder == current_user.id,
+                                                MeetingActivity.status == ActivityStatus.IN_PROGRESS).all()
+    all_tasks = TaskActivity.query.filter(TaskActivity.activity_holder == current_user.id,
+                                          TaskActivity.status == ActivityStatus.IN_PROGRESS).all()
     activities = [*all_calls, *all_meetings, *all_tasks]
     return render_template("work/activities_main.html", activities=activities)
 
@@ -117,10 +123,44 @@ def activities_new_task():
     return render_template("work/activities_new_task.html", form=form)
 
 
-@blueprint.route("/activities/complete/<int:activities_id>", methods=["POST", "GET"])
+@blueprint.route("/activities/complete/<string:activity_type>/<int:activity_id>", methods=["POST", "GET"])
 @login_required
-def activities_complete(activities_id: int):
-    return redirect(url_for("work.activities_all"))
+def activities_complete_process(activity_type: str, activity_id: int):
+    entity = None
+    match activity_type:
+        case TypeOfActivity.CALL.value:
+            entity = CallActivity.query.filter(CallActivity.id == activity_id).first()
+        case TypeOfActivity.MEETING.value:
+            entity = MeetingActivity.query.filter(MeetingActivity.id == activity_id).first()
+        case TypeOfActivity.TASK.value:
+            entity = TaskActivity.query.filter(TaskActivity.id == activity_id).first()
+    if entity:
+        entity.status = ActivityStatus.COMPLETE
+        try:
+            db.session.add(entity)
+            db.session.commit()
+
+            flash("Activity completed", "success")
+        except sqlalchemy.exc.IntegrityError:
+            db.session.rollback()
+            flash("Something went wrong", "danger")
+
+        return redirect(url_for("work.activities_all"))
+
+    flash(f"Activity with Id={activity_id} not found", "warning")
+    return redirect(url_for("work.activities_all")), 404
+
+
+@blueprint.route("/activities/completed/all", methods=["GET"])
+def activities_completed_all():
+    all_calls = CallActivity.query.filter(CallActivity.activity_holder == current_user.id,
+                                          CallActivity.status == ActivityStatus.COMPLETE).all()
+    all_meetings = MeetingActivity.query.filter(MeetingActivity.activity_holder == current_user.id,
+                                                MeetingActivity.status == ActivityStatus.COMPLETE).all()
+    all_tasks = TaskActivity.query.filter(TaskActivity.activity_holder == current_user.id,
+                                          TaskActivity.status == ActivityStatus.COMPLETE).all()
+    activities = [*all_calls, *all_meetings, *all_tasks]
+    return render_template("work/activities_completed.html", activities=activities)
 
 
 @blueprint.route("/activities/cancel/<int:activities_id>", methods=["POST", "GET"])

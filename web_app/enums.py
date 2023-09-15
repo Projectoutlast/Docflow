@@ -9,5 +9,5 @@ class TypeOfActivity(enum.Enum):
 
 class ActivityStatus(enum.Enum):
     IN_PROGRESS = "in progress"
-    COMPLETE = "comlete"
+    COMPLETE = "complete"
     OVERDUE = "overdue"

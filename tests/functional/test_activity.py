@@ -1,6 +1,7 @@
 import datetime
 
 from tests.utils_for_tests import TEST_DATE_WHEN, TEST_TIME_WHEN
+from web_app.enums import ActivityStatus, TypeOfActivity
 from web_app.models import CallActivity, MeetingActivity, TaskActivity
 
 
@@ -26,6 +27,63 @@ def test_activities_pages(test_auth_client):
     response = test_auth_client.get("/activities/new/task", follow_redirects=True)
     assert response.status_code == 200
     assert (b"Subject" and b"Describe" and b"Create") in response.data
+
+
+def test_activities_manipulate(test_auth_client):
+    """
+   GIVEN a Flask application
+   WHEN user is logged in
+   THEN check that all manipulates with activities work correct
+   """
+    response = None
+
+    calls = CallActivity.query.filter(CallActivity.status == ActivityStatus.IN_PROGRESS).all()
+    meetings = MeetingActivity.query.filter(MeetingActivity.status == ActivityStatus.IN_PROGRESS).all()
+    tasks = TaskActivity.query.filter(TaskActivity.status == ActivityStatus.IN_PROGRESS).all()
+    assert len(calls) == 10
+    assert len(meetings) == 10
+    assert len(tasks) == 10
+
+    for i in range(1, 6):
+        response = test_auth_client.post(f"/activities/complete/{TypeOfActivity.CALL.value}/{i}", follow_redirects=True)
+    calls_in_progress = CallActivity.query.filter(CallActivity.status == ActivityStatus.IN_PROGRESS).all()
+    calls_completed = CallActivity.query.filter(CallActivity.status == ActivityStatus.COMPLETE).all()
+    assert len(calls_in_progress) == 5
+    assert len(calls_completed) == 5
+    assert response.status_code == 200
+    assert b"Activity completed" in response.data
+
+    for i in range(1, 6):
+        response = test_auth_client.post(f"/activities/complete/{TypeOfActivity.MEETING.value}/{i}",
+                                         follow_redirects=True)
+    meetings_in_progress = MeetingActivity.query.filter(MeetingActivity.status == ActivityStatus.IN_PROGRESS).all()
+    meetings_completed = MeetingActivity.query.filter(MeetingActivity.status == ActivityStatus.COMPLETE).all()
+    assert len(meetings_in_progress) == 5
+    assert len(meetings_completed) == 5
+    assert response.status_code == 200
+    assert b"Activity completed" in response.data
+
+    for i in range(1, 6):
+        response = test_auth_client.post(f"/activities/complete/{TypeOfActivity.TASK.value}/{i}", follow_redirects=True)
+    tasks_in_progress = TaskActivity.query.filter(TaskActivity.status == ActivityStatus.IN_PROGRESS).all()
+    tasks_completed = TaskActivity.query.filter(TaskActivity.status == ActivityStatus.IN_PROGRESS).all()
+    assert len(tasks_in_progress) == 5
+    assert len(tasks_completed) == 5
+    assert response.status_code == 200
+    assert b"Activity completed" in response.data
+
+    response = test_auth_client.get("/activities/completed/all", follow_redirects=True)
+    assert response.status_code == 200
+
+    response = test_auth_client.post(f"/activities/complete/{TypeOfActivity.CALL.value}/{100}", follow_redirects=True)
+    assert response.status_code == 404
+
+    response = test_auth_client.post(f"/activities/complete/{TypeOfActivity.MEETING.value}/{100}",
+                                     follow_redirects=True)
+    assert response.status_code == 404
+
+    response = test_auth_client.post(f"/activities/complete/{TypeOfActivity.TASK.value}/{100}", follow_redirects=True)
+    assert response.status_code == 404
 
 
 def test_activities_form(test_auth_client):
