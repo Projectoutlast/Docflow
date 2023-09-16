@@ -26,10 +26,13 @@ def create_app(config_name: str) -> Flask:
     with app.app_context():
         from web_app.models import CallActivity, Company, Department, Employee
         db.create_all()
-        from tests.utils_for_tests import generate_activities, generate_new_company, generate_new_employee
+        from tests.utils_for_tests import (generate_activities, generate_activities_for_current_user,
+                                           generate_new_company, generate_new_employee, generate_overdue_activities)
         generate_new_company()
         generate_new_employee()
         generate_activities()
+        generate_activities_for_current_user()
+        generate_overdue_activities()
 
     login_manager.init_app(app)
 

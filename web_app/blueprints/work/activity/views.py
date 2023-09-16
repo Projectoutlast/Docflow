@@ -1,14 +1,17 @@
 import enum
 
 import sqlalchemy.exc
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
+from sqlalchemy import or_
 
 from web_app import db
 from web_app.enums import ActivityStatus, TypeOfActivity
 from web_app.models import CallActivity, Employee, MeetingActivity, TaskActivity
 from web_app.blueprints.work.activity.forms import (combine_date_time, get_all_executors, get_executor,
                                                     NewActivityCall, NewActivityMeeting, NewActivityTask)
+from web_app.utils.utilities import check_overdue_activities
 
 
 blueprint = Blueprint("work", __name__)
@@ -24,12 +27,21 @@ def home_workspace():
 @blueprint.route("/activities/all", methods=["GET"])
 @login_required
 def activities_all():
-    all_calls = CallActivity.query.filter(CallActivity.activity_holder == current_user.id,
-                                          CallActivity.status == ActivityStatus.IN_PROGRESS).all()
-    all_meetings = MeetingActivity.query.filter(MeetingActivity.activity_holder == current_user.id,
-                                                MeetingActivity.status == ActivityStatus.IN_PROGRESS).all()
-    all_tasks = TaskActivity.query.filter(TaskActivity.activity_holder == current_user.id,
-                                          TaskActivity.status == ActivityStatus.IN_PROGRESS).all()
+
+    check_overdue_activities(current_user.id)
+
+    all_calls = CallActivity.query.filter(CallActivity.executor == current_user.id,
+                                          or_(CallActivity.status == ActivityStatus.IN_PROGRESS,
+                                              CallActivity.status == ActivityStatus.OVERDUE)).all()
+
+    all_meetings = MeetingActivity.query.filter(MeetingActivity.executor == current_user.id,
+                                                or_(MeetingActivity.status == ActivityStatus.IN_PROGRESS,
+                                                    MeetingActivity.status == ActivityStatus.OVERDUE)).all()
+
+    all_tasks = TaskActivity.query.filter(TaskActivity.executor == current_user.id,
+                                          or_(TaskActivity.status == ActivityStatus.IN_PROGRESS,
+                                              TaskActivity.status == ActivityStatus.OVERDUE)).all()
+
     activities = [*all_calls, *all_meetings, *all_tasks]
     return render_template("work/activities_main.html", activities=activities)
 
@@ -145,7 +157,7 @@ def activities_complete_process(activity_type: str, activity_id: int):
             db.session.rollback()
             flash("Something went wrong", "danger")
 
-        return redirect(url_for("work.activities_all"))
+        return redirect(request.referrer)
 
     flash(f"Activity with Id={activity_id} not found", "warning")
     return redirect(url_for("work.activities_all")), 404
@@ -161,6 +173,18 @@ def activities_completed_all():
                                           TaskActivity.status == ActivityStatus.COMPLETE).all()
     activities = [*all_calls, *all_meetings, *all_tasks]
     return render_template("work/activities_completed.html", activities=activities)
+
+
+@blueprint.route("/activities/overdue/all", methods=["GET"])
+def activities_overdue_all():
+    all_calls = CallActivity.query.filter(CallActivity.activity_holder == current_user.id,
+                                          CallActivity.status == ActivityStatus.OVERDUE).all()
+    all_meetings = MeetingActivity.query.filter(MeetingActivity.activity_holder == current_user.id,
+                                                MeetingActivity.status == ActivityStatus.OVERDUE).all()
+    all_tasks = TaskActivity.query.filter(TaskActivity.activity_holder == current_user.id,
+                                          TaskActivity.status == ActivityStatus.OVERDUE).all()
+    activities = [*all_calls, *all_meetings, *all_tasks]
+    return render_template("work/activities_overdue.html", activities=activities)
 
 
 @blueprint.route("/activities/cancel/<int:activities_id>", methods=["POST", "GET"])

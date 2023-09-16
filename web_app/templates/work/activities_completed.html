@@ -47,13 +47,7 @@
                 <td>{{ activity.finish_until.strftime("%m-%d-%Y %H:%M") }}</td>
                 <td>{{ activity.status.value }}</td>
                 <td>
-                    <a class="nav-link" href="{{ url_for('work.activities_complete_process',
-                                                 activity_type=activity.type_of.value,
-                                                 activity_id=activity.id) }}">Complete</a>
-                    <a class="nav-link" href="{{ url_for('work.activities_cancel',
-                                                 activities_id=activity.id) }}">Cancel</a>
-                    <a class="nav-link" href="{{ url_for('work.activities_extend',
-                                                 activities_id=activity.id) }}">Extend</a>
+                    <a class="nav-link" href="">Return for doing over</a>
                 </td>
             </tr>
             {% endfor %}
