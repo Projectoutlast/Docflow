@@ -187,10 +187,30 @@ def activities_overdue_all():
     return render_template("work/activities_overdue.html", activities=activities)
 
 
-@blueprint.route("/activities/cancel/<int:activities_id>", methods=["POST", "GET"])
+@blueprint.route("/activities/cancel/<string:activity_type>/<int:activity_id>", methods=["POST", "GET"])
 @login_required
-def activities_cancel(activities_id: int):
-    return redirect(url_for("work.activities_all"))
+def activities_cancel(activity_type: str, activity_id: int):
+    entity = None
+    match activity_type:
+        case TypeOfActivity.CALL.value:
+            entity = CallActivity.query.filter(CallActivity.id == activity_id).first()
+        case TypeOfActivity.MEETING.value:
+            entity = MeetingActivity.query.filter(MeetingActivity.id == activity_id).first()
+        case TypeOfActivity.TASK.value:
+            entity = TaskActivity.query.filter(TaskActivity.id == activity_id).first()
+    if entity:
+        try:
+            db.session.delete(entity)
+            db.session.commit()
+
+            flash("Activity successful deleted", "success")
+        except sqlalchemy.exc.IntegrityError:
+            db.session.rollback()
+            flash("Something went wrong", "danger")
+        return redirect(request.referrer)
+
+    flash(f"Activity with Id={activity_id} not found", "warning")
+    return redirect(url_for("work.activities_all")), 404
 
 
 @blueprint.route("/activities/extend-date/<int:activities_id>", methods=["POST", "GET"])

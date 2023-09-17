@@ -39,7 +39,7 @@
             </thead>
             <tbody>
             {% for activity in activities %}
-            <tr>
+            <tr class="table-success">
                 <td>{{ activity.type_of.value }}</td>
                 <td>{{ activity.activity_holder_name }}</td>
                 <td>{{ activity.executor_name }}</td>
@@ -47,7 +47,10 @@
                 <td>{{ activity.finish_until.strftime("%m-%d-%Y %H:%M") }}</td>
                 <td>{{ activity.status.value }}</td>
                 <td>
-                    <a class="nav-link" href="">Return for doing over</a>
+                    <button type="button" class="btn btn-outline-primary btn-sm">
+                        <a class="nav-link" href="">Return for revision</a>
+                    </button>
+
                 </td>
             </tr>
             {% endfor %}

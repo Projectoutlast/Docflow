@@ -57,8 +57,7 @@ def test_activities_manipulate(test_auth_client):
     assert len(calls_completed) == 5
 
     for i in range(1, 6):
-        test_auth_client.post(f"/activities/complete/{TypeOfActivity.MEETING.value}/{i}",
-                                         follow_redirects=True)
+        test_auth_client.post(f"/activities/complete/{TypeOfActivity.MEETING.value}/{i}", follow_redirects=True)
     meetings_in_progress = MeetingActivity.query.filter(MeetingActivity.status == ActivityStatus.IN_PROGRESS).all()
     meetings_completed = MeetingActivity.query.filter(MeetingActivity.status == ActivityStatus.COMPLETE).all()
     assert len(meetings_in_progress) == 15
@@ -70,6 +69,25 @@ def test_activities_manipulate(test_auth_client):
     tasks_completed = TaskActivity.query.filter(TaskActivity.status == ActivityStatus.IN_PROGRESS).all()
     assert len(tasks_in_progress) == 15
     assert len(tasks_completed) == 15
+
+    for i in range(1, 6):
+        response = test_auth_client.post(f"/activities/cancel/{TypeOfActivity.CALL.value}/{i}", follow_redirects=True)
+    all_calls = CallActivity.query.all()
+    assert len(all_calls) == 20
+    assert response.status_code == 200
+
+    for i in range(1, 6):
+        response = test_auth_client.post(f"/activities/cancel/{TypeOfActivity.MEETING.value}/{i}",
+                                         follow_redirects=True)
+    all_meetings = MeetingActivity.query.all()
+    assert len(all_meetings) == 20
+    assert response.status_code == 200
+
+    for i in range(1, 6):
+        response = test_auth_client.post(f"/activities/cancel/{TypeOfActivity.TASK.value}/{i}", follow_redirects=True)
+    all_tasks = TaskActivity.query.all()
+    assert len(all_tasks) == 20
+    assert response.status_code == 200
 
     response = test_auth_client.get("/activities/overdue/all", follow_redirects=True)
     assert response.status_code == 200
@@ -86,6 +104,16 @@ def test_activities_manipulate(test_auth_client):
     assert response.status_code == 404
 
     response = test_auth_client.post(f"/activities/complete/{TypeOfActivity.TASK.value}/{100}", follow_redirects=True)
+    assert response.status_code == 404
+
+    response = test_auth_client.post(f"/activities/cancel/{TypeOfActivity.CALL.value}/{100}", follow_redirects=True)
+    assert response.status_code == 404
+
+    response = test_auth_client.post(f"/activities/cancel/{TypeOfActivity.MEETING.value}/{100}",
+                                     follow_redirects=True)
+    assert response.status_code == 404
+
+    response = test_auth_client.post(f"/activities/cancel/{TypeOfActivity.TASK.value}/{100}", follow_redirects=True)
     assert response.status_code == 404
 
 
