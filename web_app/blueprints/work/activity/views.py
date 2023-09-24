@@ -1,4 +1,4 @@
-import enum
+import datetime
 
 import sqlalchemy.exc
 
@@ -10,8 +10,8 @@ from web_app import db
 from web_app.enums import ActivityStatus, TypeOfActivity
 from web_app.models import CallActivity, Employee, MeetingActivity, TaskActivity
 from web_app.blueprints.work.activity.forms import (combine_date_time, get_all_executors, get_executor,
-                                                    NewActivityCall, NewActivityMeeting, NewActivityTask)
-from web_app.utils.utilities import check_overdue_activities
+                                                    ActivityCall, ActivityMeeting, ActivityTask)
+from web_app.utils.utilities import check_overdue_activities, get_activity
 
 
 blueprint = Blueprint("work", __name__)
@@ -49,7 +49,7 @@ def activities_all():
 @blueprint.route("/activities/new/call", methods=["GET", "POST"])
 @login_required
 def activities_new_call():
-    form = NewActivityCall(request.form)
+    form = ActivityCall(request.form)
     form.executor.choices = get_all_executors(current_user.id)
     if form.validate_on_submit():
         employee = Employee.query.filter(Employee.id == current_user.id).first()
@@ -78,7 +78,7 @@ def activities_new_call():
 @blueprint.route("/activities/new/meeting", methods=["GET", "POST"])
 @login_required
 def activities_new_meeting():
-    form = NewActivityMeeting(request.form)
+    form = ActivityMeeting(request.form)
     form.executor.choices = get_all_executors(current_user.id)
     if form.validate_on_submit():
         employee = Employee.query.filter(Employee.id == current_user.id).first()
@@ -108,7 +108,7 @@ def activities_new_meeting():
 @blueprint.route("/activities/new/task", methods=["GET", "POST"])
 @login_required
 def activities_new_task():
-    form = NewActivityTask(request.form)
+    form = ActivityTask(request.form)
     form.executor.choices = get_all_executors(current_user.id)
     if form.validate_on_submit():
         employee = Employee.query.filter(Employee.id == current_user.id).first()
@@ -138,14 +138,7 @@ def activities_new_task():
 @blueprint.route("/activities/complete/<string:activity_type>/<int:activity_id>", methods=["POST", "GET"])
 @login_required
 def activities_complete_process(activity_type: str, activity_id: int):
-    entity = None
-    match activity_type:
-        case TypeOfActivity.CALL.value:
-            entity = CallActivity.query.filter(CallActivity.id == activity_id).first()
-        case TypeOfActivity.MEETING.value:
-            entity = MeetingActivity.query.filter(MeetingActivity.id == activity_id).first()
-        case TypeOfActivity.TASK.value:
-            entity = TaskActivity.query.filter(TaskActivity.id == activity_id).first()
+    entity = get_activity(activity_type, activity_id)
     if entity:
         entity.status = ActivityStatus.COMPLETE
         try:
@@ -157,13 +150,19 @@ def activities_complete_process(activity_type: str, activity_id: int):
             db.session.rollback()
             flash("Something went wrong", "danger")
 
-        return redirect(request.referrer)
+        if request.referrer is None:
+            return redirect(url_for("work.activities_all"))
+        elif "overdue/all" in request.referrer:
+            return redirect(url_for("work.activities_overdue_all"))
+        else:
+            return redirect(url_for("work.activities_all"))
 
     flash(f"Activity with Id={activity_id} not found", "warning")
     return redirect(url_for("work.activities_all")), 404
 
 
 @blueprint.route("/activities/completed/all", methods=["GET"])
+@login_required
 def activities_completed_all():
     all_calls = CallActivity.query.filter(CallActivity.activity_holder == current_user.id,
                                           CallActivity.status == ActivityStatus.COMPLETE).all()
@@ -176,6 +175,7 @@ def activities_completed_all():
 
 
 @blueprint.route("/activities/overdue/all", methods=["GET"])
+@login_required
 def activities_overdue_all():
     all_calls = CallActivity.query.filter(CallActivity.activity_holder == current_user.id,
                                           CallActivity.status == ActivityStatus.OVERDUE).all()
@@ -190,14 +190,7 @@ def activities_overdue_all():
 @blueprint.route("/activities/cancel/<string:activity_type>/<int:activity_id>", methods=["POST", "GET"])
 @login_required
 def activities_cancel(activity_type: str, activity_id: int):
-    entity = None
-    match activity_type:
-        case TypeOfActivity.CALL.value:
-            entity = CallActivity.query.filter(CallActivity.id == activity_id).first()
-        case TypeOfActivity.MEETING.value:
-            entity = MeetingActivity.query.filter(MeetingActivity.id == activity_id).first()
-        case TypeOfActivity.TASK.value:
-            entity = TaskActivity.query.filter(TaskActivity.id == activity_id).first()
+    entity = get_activity(activity_type, activity_id)
     if entity:
         try:
             db.session.delete(entity)
@@ -207,7 +200,13 @@ def activities_cancel(activity_type: str, activity_id: int):
         except sqlalchemy.exc.IntegrityError:
             db.session.rollback()
             flash("Something went wrong", "danger")
-        return redirect(request.referrer)
+
+        if request.referrer is None:
+            return redirect(url_for("work.activities_all"))
+        if "overdue/all" in request.referrer:
+            return redirect(url_for("work.activities_overdue_all"))
+        elif "/all" in request.referrer:
+            return redirect(url_for("work.activities_all"))
 
     flash(f"Activity with Id={activity_id} not found", "warning")
     return redirect(url_for("work.activities_all")), 404
@@ -217,3 +216,30 @@ def activities_cancel(activity_type: str, activity_id: int):
 @login_required
 def activities_extend(activities_id: int):
     return redirect(url_for("work.activities_all"))
+
+
+@blueprint.route("/activities/<string:activity_type>/<int:activity_id>/info", methods=["GET", "POST"])
+@login_required
+def get_activity_info(activity_type: str, activity_id: int):
+    activity = get_activity(activity_type, activity_id)
+    if activity:
+        return render_template("work/activity_info.html", activity=activity)
+    flash(f"Activity not found", "warning")
+    return redirect(url_for("work.activities_all")), 404
+
+
+@blueprint.route("/activities/task/<int:activity_id>/edit", methods=["GET", "POST"])
+@login_required
+def activity_task_edit(activity_id: int):
+    activity = get_activity(TypeOfActivity.TASK.value, activity_id)
+    if activity:
+        form = ActivityTask(request.form)
+        form.executor.choices = get_all_executors(current_user.id)
+        form.describe.data = activity.describe
+        form.when_date.data = datetime.datetime.strptime(str(activity.finish_until.date()), "%Y-%m-%d")
+        form.when_time.data = datetime.datetime.strptime(str(activity.finish_until.time()), "%H:%M:%S")
+        if form.validate_on_submit():
+            pass
+        return render_template("work/activities_edit.html", activity=activity, form=form)
+    flash(f"Activity not found", "warning")
+    return redirect(url_for("work.activities_all")), 404

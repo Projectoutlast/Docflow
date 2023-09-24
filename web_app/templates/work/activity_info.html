@@ -1,0 +1,86 @@
+{% extends "base_workspace.html" %}
+{% block content %}
+<div class="row">
+    {% if activity.type_of.value == "call" %}
+    <div class="row">
+        <div class="col"></div>
+        <div class="col-3">
+            <img src="/static/images/activities_call.jpg" alt="Call activity">
+            <br>
+            <b>Call to</b> {{ activity.to_whom }}
+            <br>
+            <br>
+            <b>Finish until</b> {{ activity.finish_until }}
+            <br>
+            <b>Activity holder</b> {{ activity.activity_holder_name }}
+            <br>
+            <br>
+            <button type="button" class="btn btn-success btn-sm">
+                <a class="nav-link" href="{{ url_for('work.activities_complete_process',
+                activity_type=activity.type_of.value, activity_id=activity.id) }}">Complete</a>
+            </button>
+            <button type="button" class="btn btn-warning btn-sm">
+                <a class="nav-link" href="{{ url_for('work.activity_task_edit', activity_id=activity.id) }}">Edit</a>
+            </button>
+        </div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col-4"></div>
+    </div>
+    {% elif activity.type_of.value == "meeting" %}
+    <div class="row">
+        <div class="col"></div>
+        <div class="col-3">
+            <img src="/static/images/activities_meeting.jpg" alt="Meeting activity">
+            <br>
+            <b>Meeting with</b> {{ activity.with_whom }}
+            <br>
+            <b>Location</b> {{ activity.location }}
+            <br>
+            <br>
+            <b>Finish until</b> {{ activity.finish_until }}
+            <br>
+            <b>Activity holder</b> {{ activity.activity_holder_name }}
+            <br>
+            <br>
+            <button type="button" class="btn btn-success btn-sm">
+                <a class="nav-link" href="{{ url_for('work.activities_complete_process',
+                activity_type=activity.type_of.value, activity_id=activity.id) }}">Complete</a>
+            </button>
+        </div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col-4"></div>
+    </div>
+    {% elif activity.type_of.value == "task" %}
+    <div class="row">
+        <div class="col"></div>
+        <div class="col-3">
+            <img src="/static/images/activities_call.jpg" alt="Call activity">
+            <br>
+            <b>Call to</b> {{ activity.to_whom }}
+            <br>
+            <br>
+            <b>Finish until</b> {{ activity.finish_until }}
+            <br>
+            <b>Activity holder</b> {{ activity.activity_holder_name }}
+            <br>
+            <br>
+            <button type="button" class="btn btn-success btn-sm">
+                <a class="nav-link" href="{{ url_for('work.activities_complete_process',
+                activity_type=activity.type_of.value, activity_id=activity.id) }}">Complete</a>
+            </button>
+            <button type="button" class="btn btn-warning btn-sm">
+                <a class="nav-link" href="{{ url_for('work.activity_task_edit', activity_id=activity.id) }}">Edit</a>
+            </button>
+        </div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col"></div>
+        <div class="col-4"></div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

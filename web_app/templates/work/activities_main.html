@@ -42,33 +42,49 @@
             <tbody>
             {% for activity in activities %}
             {% if activity.status.value == "in progress" %}
-                <tr class="table-light">
-                    <td>{{ activity.type_of.value }}</td>
-                    <td>{{ activity.activity_holder_name }}</td>
-                    <td>{{ activity.executor_name }}</td>
-                    <td>{{ activity.appointed.strftime("%m-%d-%Y %H:%M:%S") }}</td>
-                    <td>{{ activity.finish_until.strftime("%m-%d-%Y %H:%M") }}</td>
-                    <td>{{ activity.status.value }}</td>
-                    <td>
-                        <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-                            <button type="button" class="btn btn-primary btn-sm">
-                                <a class="nav-link" href="{{ url_for('work.activities_extend',
-                                activities_id=activity.id) }}">Info</a>
-                            </button>
-                            <button type="button" class="btn btn-success btn-sm">
-                                <a class="nav-link" href="{{ url_for('work.activities_complete_process',
-                                activity_type=activity.type_of.value, activity_id=activity.id) }}">Complete</a>
-                            </button>
-                            <button type="button" class="btn btn-warning btn-sm">
-                                <a class="nav-link" href="{{ url_for('work.activities_cancel',
-                                activity_type=activity.type_of.value, activity_id=activity.id) }}">Cancel</a>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
+            <tr class="table-light">
+                <td>
+                    {% if activity.type_of.value == "call" %}
+                    <img src="/static/images/activities_call.jpg" alt="{{ activity.type_of.value }}">
+                    {% elif activity.type_of.value == "meeting" %}
+                    <img src="/static/images/activities_meeting.jpg" alt="{{ activity.type_of.value }}">
+                    {% elif activity.type_of.value == "task" %}
+                    <img src="/static/images/activities_task.jpg" alt="{{ activity.type_of.value }}">
+                    {% endif %}
+                </td>
+                <td>{{ activity.activity_holder_name }}</td>
+                <td>{{ activity.executor_name }}</td>
+                <td>{{ activity.appointed.strftime("%m-%d-%Y %H:%M:%S") }}</td>
+                <td>{{ activity.finish_until.strftime("%m-%d-%Y %H:%M") }}</td>
+                <td>{{ activity.status.value }}</td>
+                <td>
+                    <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+                        <button type="button" class="btn btn-primary btn-sm">
+                            <a class="nav-link" href="{{ url_for('work.get_activity_info',
+                            activity_type=activity.type_of.value, activity_id=activity.id) }}">Info</a>
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm">
+                            <a class="nav-link" href="{{ url_for('work.activities_complete_process',
+                            activity_type=activity.type_of.value, activity_id=activity.id) }}">Complete</a>
+                        </button>
+                        <button type="button" class="btn btn-warning btn-sm">
+                            <a class="nav-link" href="{{ url_for('work.activities_cancel',
+                            activity_type=activity.type_of.value, activity_id=activity.id) }}">Cancel</a>
+                        </button>
+                    </div>
+                </td>
+            </tr>
             {% elif activity.status.value == "overdue" %}
                 <tr class="table-warning">
-                    <td>{{ activity.type_of.value }}</td>
+                    <td>
+                        {% if activity.type_of.value == "call" %}
+                        <img src="/static/images/activities_call.jpg" alt="{{ activity.type_of.value }}">
+                        {% elif activity.type_of.value == "meeting" %}
+                        <img src="/static/images/activities_meeting.jpg" alt="{{ activity.type_of.value }}">
+                        {% elif activity.type_of.value == "task" %}
+                        <img src="/static/images/activities_task.jpg" alt="{{ activity.type_of.value }}">
+                        {% endif %}
+                    </td>
                     <td>{{ activity.activity_holder_name }}</td>
                     <td>{{ activity.executor_name }}</td>
                     <td>{{ activity.appointed.strftime("%m-%d-%Y %H:%M:%S") }}</td>
@@ -77,8 +93,8 @@
                     <td>
                         <div class="btn-group" role="group" aria-label="Basic mixed styles example">
                             <button type="button" class="btn btn-primary btn-sm">
-                                <a class="nav-link" href="{{ url_for('work.activities_extend',
-                                activities_id=activity.id) }}">Info</a>
+                                <a class="nav-link" href="{{ url_for('work.get_activity_info',
+                                activity_type=activity.type_of.value, activity_id=activity.id) }}">Info</a>
                             </button>
                             <button type="button" class="btn btn-success btn-sm">
                                 <a class="nav-link" href="{{ url_for('work.activities_complete_process',
@@ -90,7 +106,9 @@
                             </button>
                         </div>
                     </td>
+
                 </tr>
+
             {% endif %}
             {% endfor %}
             </tbody>

@@ -8,7 +8,7 @@ from wtforms.validators import DataRequired, Length
 from web_app.models import Employee
 
 
-class NewActivityCall(FlaskForm):
+class ActivityCall(FlaskForm):
 
     to_whom = StringField("To whom", validators=[DataRequired(), Length(min=2, max=60)])
     when_date = DateField("Date", validators=[DataRequired()])
@@ -18,7 +18,7 @@ class NewActivityCall(FlaskForm):
     submit = SubmitField("Create")
 
 
-class NewActivityMeeting(FlaskForm):
+class ActivityMeeting(FlaskForm):
 
     with_whom = StringField("With whom", validators=[DataRequired(), Length(min=2, max=60)])
     location = StringField("Location", validators=[DataRequired()])
@@ -29,7 +29,7 @@ class NewActivityMeeting(FlaskForm):
     submit = SubmitField("Create")
 
 
-class NewActivityTask(FlaskForm):
+class ActivityTask(FlaskForm):
 
     subject = StringField("Subject", validators=[DataRequired(), Length(min=2, max=60)])
     describe = TextAreaField("Describe", validators=[DataRequired()])
@@ -57,7 +57,7 @@ def combine_date_time(dt: date, tm: time) -> datetime:
     return datetime.combine(dt, tm)
 
 
-def get_executor(form_instance: NewActivityCall | NewActivityMeeting | NewActivityTask) -> int:
+def get_executor(form_instance: ActivityCall | ActivityMeeting | ActivityTask) -> int:
 
     """Get executor from forms and return value for db"""
 

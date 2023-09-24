@@ -3,7 +3,7 @@ import datetime
 import sqlalchemy.exc
 
 from web_app import db
-from web_app.enums import ActivityStatus
+from web_app.enums import ActivityStatus, TypeOfActivity
 from web_app.models import CallActivity, MeetingActivity, TaskActivity
 
 
@@ -37,4 +37,20 @@ def check_overdue_activities(user_id: int) -> None:
         db.session.commit()
     except sqlalchemy.exc.IntegrityError:
         db.session.rollback()
+    return None
+
+
+def get_activity(activity_type: str, activity_id: int) -> db.Model:
+    """
+    Get activity type, id and return db.Model activity
+    """
+
+    match activity_type:
+        case TypeOfActivity.CALL.value:
+            return CallActivity.query.filter(CallActivity.id == activity_id).first()
+        case TypeOfActivity.MEETING.value:
+            return MeetingActivity.query.filter(MeetingActivity.id == activity_id).first()
+        case TypeOfActivity.TASK.value:
+            return TaskActivity.query.filter(TaskActivity.id == activity_id).first()
+
     return None

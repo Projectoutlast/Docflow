@@ -1,0 +1,58 @@
+{% extends "base_workspace.html" %}
+{% block content %}
+<form role="form" method="post">
+    {{ form.csrf_token }}
+    <div class="row">
+        <div class="col"></div>
+        <div class="col-3">
+            {{ form.subject(placeholder=activity.subject, class="form-control", value=activity.subject) }}
+            {% if form.subject.errors %}
+            <br>
+            {% for error in form.subject.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            <br>
+            {{ form.describe(placeholder=activity.describe, class="form-control") }}
+            {% if form.describe.errors %}
+            <br>
+            {% for error in form.describe.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            <br>
+            {{ form.when_date.label() }}
+            {{ form.when_date(class="form-control type=text aria-label=default input example") }}
+            <br>
+            {{ form.when_time.label() }}
+            {{ form.when_time(class="form-control type=text aria-label=default input example") }}
+            <br>
+            {{ form.submit() }}
+        </div>
+        <div class="col"></div>
+        <div class="col">
+            {{ form.executor.label() }}
+            {{ form.executor(placeholder="Executor") }}
+            {% if form.executor.errors %}
+            <br>
+            {% for error in form.executor.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            <br>
+        </div>
+        <div class="col">
+            {{ form.myself(class="form-check-input type=checkbox") }}
+            Myself
+        </div>
+        <div class="col-4"></div>
+    </div>
+    <br>
+</form>
+{% endblock %}
