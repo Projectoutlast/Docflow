@@ -18,6 +18,10 @@ class ActivityCall(FlaskForm):
     submit = SubmitField("Create")
 
 
+class ActivityCallEdit(ActivityCall):
+    submit = SubmitField("Update")
+
+
 class ActivityMeeting(FlaskForm):
 
     with_whom = StringField("With whom", validators=[DataRequired(), Length(min=2, max=60)])
@@ -29,6 +33,10 @@ class ActivityMeeting(FlaskForm):
     submit = SubmitField("Create")
 
 
+class ActivityMeetingEdit(ActivityMeeting):
+    submit = SubmitField("Update")
+
+
 class ActivityTask(FlaskForm):
 
     subject = StringField("Subject", validators=[DataRequired(), Length(min=2, max=60)])
@@ -38,6 +46,10 @@ class ActivityTask(FlaskForm):
     executor = SelectField("Executor", coerce=int, validators=[DataRequired()])
     myself = BooleanField("Myself")
     submit = SubmitField("Create")
+
+
+class ActivityTaskEdit(ActivityTask):
+    submit = SubmitField("Update")
 
 
 def get_all_executors(activity_holder_id: int) -> list[tuple]:

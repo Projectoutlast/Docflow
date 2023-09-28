@@ -10,7 +10,8 @@ from web_app import db
 from web_app.enums import ActivityStatus, TypeOfActivity
 from web_app.models import CallActivity, Employee, MeetingActivity, TaskActivity
 from web_app.blueprints.work.activity.forms import (combine_date_time, get_all_executors, get_executor,
-                                                    ActivityCall, ActivityMeeting, ActivityTask)
+                                                    ActivityCall, ActivityCallEdit, ActivityMeeting,
+                                                    ActivityMeetingEdit, ActivityTask, ActivityTaskEdit)
 from web_app.utils.utilities import check_overdue_activities, get_activity
 
 
@@ -232,14 +233,123 @@ def get_activity_info(activity_type: str, activity_id: int):
 @login_required
 def activity_task_edit(activity_id: int):
     activity = get_activity(TypeOfActivity.TASK.value, activity_id)
-    if activity:
-        form = ActivityTask(request.form)
-        form.executor.choices = get_all_executors(current_user.id)
-        form.describe.data = activity.describe
-        form.when_date.data = datetime.datetime.strptime(str(activity.finish_until.date()), "%Y-%m-%d")
-        form.when_time.data = datetime.datetime.strptime(str(activity.finish_until.time()), "%H:%M:%S")
-        if form.validate_on_submit():
-            pass
-        return render_template("work/activities_edit.html", activity=activity, form=form)
-    flash(f"Activity not found", "warning")
-    return redirect(url_for("work.activities_all")), 404
+    form = ActivityTaskEdit(request.form)
+    if not activity:
+        flash(f"Activity not found", "warning")
+        return redirect(url_for("work.activities_all")), 404
+
+    form.executor.choices = get_all_executors(current_user.id)
+    form.describe.data = activity.describe
+    form.when_date.data = datetime.datetime.strptime(str(activity.finish_until.date()), "%Y-%m-%d")
+    form.when_time.data = datetime.datetime.strptime(str(activity.finish_until.time()), "%H:%M:%S").time()
+
+    return render_template("work/activities_edit.html", activity=activity, form=form)
+
+
+@blueprint.route("/activities/task/<int:activity_id>/update", methods=["POST"])
+@login_required
+def activity_task_update(activity_id: int):
+    activity = get_activity(TypeOfActivity.TASK.value, activity_id)
+    form = ActivityTaskEdit(request.form)
+    form.executor.choices = get_all_executors(current_user.id)
+    if form.validate_on_submit():
+        executor = Employee.query.filter(Employee.id == get_executor(form)).first()
+        activity.subject = form.subject.data
+        activity.describe = form.describe.data
+        activity.executor = get_executor(form)
+        activity.executor_name = f"{executor.first_name} {executor.last_name}"
+        activity.finish_until = combine_date_time(form.when_date.data, form.when_time.data)
+        try:
+            db.session.commit()
+
+            flash("An activity successfully updated!", "success")
+            return redirect(url_for("work.activities_all"))
+        except sqlalchemy.exc.IntegrityError:
+            db.session.rollback()
+            flash("Invalid data was passed, try again!", "danger")
+            return render_template("work/activities_edit.html", form=form), 500
+    return redirect(url_for("work.activity_task_edit", activity_id=activity_id, activity=activity))
+
+
+@blueprint.route("/activities/call/<int:activity_id>/edit", methods=["GET", "POST"])
+@login_required
+def activity_call_edit(activity_id: int):
+    activity = get_activity(TypeOfActivity.CALL.value, activity_id)
+    form = ActivityCallEdit(request.form)
+    if not activity:
+        flash(f"Activity not found", "warning")
+        return redirect(url_for("work.activities_all")), 404
+
+    form.executor.choices = get_all_executors(current_user.id)
+    form.to_whom.data = activity.to_whom
+    form.when_date.data = datetime.datetime.strptime(str(activity.finish_until.date()), "%Y-%m-%d")
+    form.when_time.data = datetime.datetime.strptime(str(activity.finish_until.time()), "%H:%M:%S").time()
+
+    return render_template("work/activities_edit.html", activity=activity, form=form)
+
+
+@blueprint.route("/activities/call/<int:activity_id>/update", methods=["POST"])
+@login_required
+def activity_call_update(activity_id: int):
+    activity = get_activity(TypeOfActivity.CALL.value, activity_id)
+    form = ActivityCallEdit(request.form)
+    form.executor.choices = get_all_executors(current_user.id)
+    if form.validate_on_submit():
+        executor = Employee.query.filter(Employee.id == get_executor(form)).first()
+        activity.to_whom = form.to_whom.data
+        activity.executor = get_executor(form)
+        activity.executor_name = f"{executor.first_name} {executor.last_name}"
+        activity.finish_until = combine_date_time(form.when_date.data, form.when_time.data)
+        try:
+            db.session.commit()
+
+            flash("An activity successfully updated!", "success")
+            return redirect(url_for("work.activities_all"))
+        except sqlalchemy.exc.IntegrityError:
+            db.session.rollback()
+            flash("Invalid data was passed, try again!", "danger")
+            return render_template("work/activities_edit.html", form=form), 500
+    return redirect(url_for("work.activity_call_edit", activity_id=activity_id, activity=activity))
+
+
+@blueprint.route("/activities/meeting/<int:activity_id>/edit", methods=["GET", "POST"])
+@login_required
+def activity_meeting_edit(activity_id: int):
+    activity = get_activity(TypeOfActivity.MEETING.value, activity_id)
+    form = ActivityMeetingEdit(request.form)
+    if not activity:
+        flash(f"Activity not found", "warning")
+        return redirect(url_for("work.activities_all")), 404
+
+    form.executor.choices = get_all_executors(current_user.id)
+    form.with_whom.data = activity.with_whom
+    form.location.data = activity.location
+    form.when_date.data = datetime.datetime.strptime(str(activity.finish_until.date()), "%Y-%m-%d")
+    form.when_time.data = datetime.datetime.strptime(str(activity.finish_until.time()), "%H:%M:%S").time()
+
+    return render_template("work/activities_edit.html", activity=activity, form=form)
+
+
+@blueprint.route("/activities/meeting/<int:activity_id>/update", methods=["POST"])
+@login_required
+def activity_meeting_update(activity_id: int):
+    activity = get_activity(TypeOfActivity.MEETING.value, activity_id)
+    form = ActivityMeetingEdit(request.form)
+    form.executor.choices = get_all_executors(current_user.id)
+    if form.validate_on_submit():
+        executor = Employee.query.filter(Employee.id == get_executor(form)).first()
+        activity.with_whom = form.with_whom.data
+        activity.location = form.location.data
+        activity.executor = get_executor(form)
+        activity.executor_name = f"{executor.first_name} {executor.last_name}"
+        activity.finish_until = combine_date_time(form.when_date.data, form.when_time.data)
+        try:
+            db.session.commit()
+
+            flash("An activity successfully updated!", "success")
+            return redirect(url_for("work.activities_all"))
+        except sqlalchemy.exc.IntegrityError:
+            db.session.rollback()
+            flash("Invalid data was passed, try again!", "danger")
+            return render_template("work/activities_edit.html", form=form), 500
+    return redirect(url_for("work.activity_meeting_edit", activity_id=activity_id, activity=activity))

@@ -20,7 +20,7 @@
                 activity_type=activity.type_of.value, activity_id=activity.id) }}">Complete</a>
             </button>
             <button type="button" class="btn btn-warning btn-sm">
-                <a class="nav-link" href="{{ url_for('work.activity_task_edit', activity_id=activity.id) }}">Edit</a>
+                <a class="nav-link" href="{{ url_for('work.activity_call_edit', activity_id=activity.id) }}">Edit</a>
             </button>
         </div>
         <div class="col"></div>
@@ -48,6 +48,9 @@
                 <a class="nav-link" href="{{ url_for('work.activities_complete_process',
                 activity_type=activity.type_of.value, activity_id=activity.id) }}">Complete</a>
             </button>
+            <button type="button" class="btn btn-warning btn-sm">
+                <a class="nav-link" href="{{ url_for('work.activity_meeting_edit', activity_id=activity.id) }}">Edit</a>
+            </button>
         </div>
         <div class="col"></div>
         <div class="col"></div>
@@ -58,9 +61,11 @@
     <div class="row">
         <div class="col"></div>
         <div class="col-3">
-            <img src="/static/images/activities_call.jpg" alt="Call activity">
+            <img src="/static/images/activities_task.jpg" alt="Task activity">
             <br>
-            <b>Call to</b> {{ activity.to_whom }}
+            <b>Subject</b> {{ activity.subject }}
+            <br>
+            <b>Describe</b> {{ activity.describe }}
             <br>
             <br>
             <b>Finish until</b> {{ activity.finish_until }}

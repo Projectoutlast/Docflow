@@ -9,10 +9,10 @@ from web_app.models import CallActivity, MeetingActivity, TaskActivity
 
 def test_activities_pages(test_auth_client):
     """
-   GIVEN a Flask application
-   WHEN user is logged in
-   THEN check that all activities page work correct
-   """
+    GIVEN a Flask application
+    WHEN user is logged in
+    THEN check that all activities page work correct
+    """
 
     response = test_auth_client.get("/activities/all", follow_redirects=True)
     assert response.status_code == 200
@@ -33,10 +33,10 @@ def test_activities_pages(test_auth_client):
 
 def test_activities_manipulate(test_auth_client):
     """
-   GIVEN a Flask application
-   WHEN user is logged in
-   THEN check that all manipulates with activities work correct
-   """
+    GIVEN a Flask application
+    WHEN user is logged in
+    THEN check that all manipulates with activities work correct
+    """
     response = None
 
     calls = CallActivity.query.filter(or_(CallActivity.status == ActivityStatus.IN_PROGRESS,
@@ -119,10 +119,10 @@ def test_activities_manipulate(test_auth_client):
 
 def test_activities_form(test_auth_client):
     """
-   GIVEN a Flask application
-   WHEN user is logged in
-   THEN check that all activities form work correct
-   """
+    GIVEN a Flask application
+    WHEN user is logged in
+    THEN check that all activities form work correct
+    """
 
     response = test_auth_client.get("/activities/all", follow_redirects=True)
     assert b"John Due" in response.data
@@ -164,3 +164,112 @@ def test_activities_form(test_auth_client):
     assert b"A new activity Task was created!" in response.data
     assert task.activity_holder == 1
     assert task.finish_until == datetime.datetime(2024, 12, 31, 12, 0)
+
+
+def test_get_the_activity_info(test_auth_client):
+    """
+    GIVEN a Flask application
+    WHEN user is logged in
+    THEN check that process getting the activity work correct
+    """
+    response = test_auth_client.get(f"/activities/{TypeOfActivity.CALL.value}/{15}/info", follow_redirects=True)
+    assert response.status_code == 200
+    assert b"Call to" in response.data
+
+    response = test_auth_client.get(f"/activities/{TypeOfActivity.MEETING.value}/{15}/info", follow_redirects=True)
+    assert response.status_code == 200
+    assert b"Meeting with" in response.data
+    assert b"Location" in response.data
+
+    response = test_auth_client.get(f"/activities/{TypeOfActivity.TASK.value}/{15}/info", follow_redirects=True)
+    assert response.status_code == 200
+    assert b"Subject" in response.data
+    assert b"Describe" in response.data
+
+    response = test_auth_client.get(f"/activities/{TypeOfActivity.TASK.value}/{115}/info", follow_redirects=True)
+    assert response.status_code == 404
+
+
+def test_activities_task_edit_and_update(test_auth_client):
+    """
+    GIVEN a Flask application
+    WHEN user is logged in
+    THEN check that task activities editing and update process work correctly
+    """
+    response = test_auth_client.get(f"/activities/task/{150}/edit", follow_redirects=True)
+    assert response.status_code == 404
+
+    task_before_update = TaskActivity.query.filter(TaskActivity.id == 15).first()
+    assert task_before_update is not None
+
+    response = test_auth_client.get(f"/activities/task/{15}/edit", follow_redirects=True)
+    assert response.status_code == 200
+    assert bytes(task_before_update.subject, "utf-8") in response.data
+
+    response = test_auth_client.post(f"/activities/task/{15}/update", follow_redirects=True)
+    assert response.status_code == 200
+    assert bytes(task_before_update.subject, "utf-8") in response.data
+
+    task_payload = {"subject": "Monty Python",
+                    "describe": "Hello world",
+                    "when_date": TEST_DATE_WHEN,
+                    "when_time": TEST_TIME_WHEN.strftime("%H:%M"),
+                    "executor": 12,
+                    "myself": False}
+    response = test_auth_client.post(f"/activities/task/{15}/update", data=task_payload, follow_redirects=True)
+    task_after_update = TaskActivity.query.filter(TaskActivity.subject == "Monty Python").first()
+    assert task_after_update.describe == "Hello world"
+    assert response.status_code == 200
+    assert b"An activity successfully updated!" in response.data
+
+    response = test_auth_client.get(f"/activities/call/{150}/edit", follow_redirects=True)
+    assert response.status_code == 404
+
+    call_before_update = CallActivity.query.filter(CallActivity.id == 15).first()
+    assert call_before_update is not None
+
+    response = test_auth_client.get(f"/activities/call/{15}/edit", follow_redirects=True)
+    assert response.status_code == 200
+    assert bytes(call_before_update.to_whom, "utf-8") in response.data
+
+    response = test_auth_client.post(f"/activities/call/{15}/update", follow_redirects=True)
+    assert response.status_code == 200
+    assert bytes(call_before_update.to_whom, "utf-8") in response.data
+
+    call_payload = {"to_whom": "NEO",
+                    "when_date": TEST_DATE_WHEN,
+                    "when_time": TEST_TIME_WHEN.strftime("%H:%M"),
+                    "executor": 1,
+                    "myself": False}
+    response = test_auth_client.post(f"/activities/call/{15}/update", data=call_payload, follow_redirects=True)
+    call_after_update = CallActivity.query.filter(CallActivity.to_whom == "NEO").first()
+    assert call_after_update.to_whom == "NEO"
+    assert response.status_code == 200
+    assert b"An activity successfully updated!" in response.data
+
+    response = test_auth_client.get(f"/activities/meeting/{150}/edit", follow_redirects=True)
+    assert response.status_code == 404
+
+    meeting_before_update = MeetingActivity.query.filter(MeetingActivity.id == 15).first()
+    assert meeting_before_update is not None
+
+    response = test_auth_client.get(f"/activities/meeting/{15}/edit", follow_redirects=True)
+    assert response.status_code == 200
+    assert bytes(meeting_before_update.with_whom, "utf-8") in response.data
+
+    response = test_auth_client.post(f"/activities/meeting/{15}/update", follow_redirects=True)
+    assert response.status_code == 200
+    assert bytes(meeting_before_update.with_whom, "utf-8") in response.data
+
+    meeting_payload = {"with_whom": "Neo",
+                       "location": "Matrix",
+                       "when_date": TEST_DATE_WHEN,
+                       "when_time": TEST_TIME_WHEN.strftime("%H:%M"),
+                       "executor": 1,
+                       "myself": False}
+    response = test_auth_client.post(f"/activities/meeting/{15}/update", data=meeting_payload, follow_redirects=True)
+    call_after_update = MeetingActivity.query.filter(MeetingActivity.location == "Matrix").first()
+    assert call_after_update.with_whom == "Neo"
+    assert call_after_update.location == "Matrix"
+    assert response.status_code == 200
+    assert b"An activity successfully updated!" in response.data

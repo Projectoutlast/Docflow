@@ -40,7 +40,7 @@ def check_overdue_activities(user_id: int) -> None:
     return None
 
 
-def get_activity(activity_type: str, activity_id: int) -> db.Model:
+def get_activity(activity_type: str, activity_id: int) -> db.Model | None:
     """
     Get activity type, id and return db.Model activity
     """
