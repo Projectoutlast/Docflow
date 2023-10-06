@@ -1,4 +1,5 @@
 import datetime
+import pathlib
 
 import sqlalchemy.exc
 
@@ -54,3 +55,23 @@ def get_activity(activity_type: str, activity_id: int) -> db.Model | None:
             return TaskActivity.query.filter(TaskActivity.id == activity_id).first()
 
     return None
+
+
+def get_path_to_profile_photo(path: str) -> str:
+    """
+    Get path to profile photo for current user, check, if folder is existing or not.
+    If exist - clear data in folder and return path for writing a new path for new profile photo
+    If not exist - create a folder for a profile photo for the current user
+    """
+    if all([pathlib.Path(path).exists(), pathlib.Path(path).is_dir()]):
+        delete_data_from_exact_folder(pathlib.Path(path))
+        return str(path)
+    pathlib.Path(path).mkdir(exist_ok=True)
+    return str(path)
+
+
+def delete_data_from_exact_folder(path: pathlib.Path) -> None:
+    """Get path to directory and clear that one"""
+    for file in path.iterdir():
+        file.unlink()
+    return

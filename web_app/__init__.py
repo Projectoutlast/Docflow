@@ -48,6 +48,9 @@ def create_app(config_name: str) -> Flask:
     from web_app.blueprints.work.activity.views import blueprint as work_blueprint
     app.register_blueprint(work_blueprint)
 
+    from web_app.blueprints.account.views import blueprint as account_settings_blueprint
+    app.register_blueprint(account_settings_blueprint)
+
     from web_app.models import Employee
 
     @login_manager.user_loader

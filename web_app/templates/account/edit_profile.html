@@ -1,0 +1,70 @@
+{% extends "base_workspace.html" %}
+{% block content %}
+<div class="row">
+    <div class="col"></div>
+    <div class="col">
+        <form role="form" enctype="multipart/form-data" method="post" action="{{ url_for('settings.user_edit_photo_process') }}">
+            {{ form_data.csrf_token }}
+
+            <img src="{{ employee.profile_photo[employee.profile_photo.find('static') - 1:] }}" class="rounded-circle shadow-4"
+                 style="width: 100px;" alt="/static/profile_photos/without_avatar.jpg" />
+            <br>
+            <br>
+            {{ form_photo.photo.label(class="text-secondary") }}
+            {{ form_photo.photo(class="form-control form-control-sm") }}
+            <br>
+            {{ form_photo.submit() }}
+            <br>
+            {% if form_photo.photo.errors %}
+            <br>
+            {% for error in form_photo.photo.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            <br>
+        </form>
+        <form role="form" method="post" action="{{ url_for('settings.user_edit_data_process') }}">
+            {{ form_data.csrf_token }}
+
+            {{ form_data.first_name.label(class="text-secondary") }}
+            {{ form_data.first_name(value=employee.first_name, class="form-control form-control-sm") }}
+            {% if form_data.first_name.errors %}
+            <br>
+            {% for error in form_data.first_name.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            <br>
+            {{ form_data.last_name.label(class="text-secondary") }}
+            {{ form_data.last_name(value=employee.last_name, class="form-control form-control-sm") }}
+            {% if form_data.last_name.errors %}
+            <br>
+            {% for error in form_data.last_name.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            <br>
+            {{ form_data.email.label(class="text-secondary") }}
+            {{ form_data.email(value=employee.email, class="form-control form-control-sm") }}
+            <i class="text-secondary">If you change your e-mail, it needs to confirm again.</i>
+            <br>
+            {% if form_data.email.errors %}
+            {% for error in form_data.email.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            <br>
+            {{ form_data.submit() }}
+        </form>
+    </div>
+    <div class="col"></div>
+</div>
+{% endblock %}

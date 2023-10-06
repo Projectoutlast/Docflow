@@ -4,6 +4,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from flask_login import UserMixin
 
+from config import Config
 from web_app.enums import ActivityStatus, TypeOfActivity
 from web_app import db
 
@@ -44,6 +45,7 @@ class Employee(db.Model, UserMixin):
     position = db.Column(db.String, nullable=False, default="manager")
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
+    profile_photo = db.Column(db.String, default=Config.DEFAULT_AVATAR_PATH)
 
     def __repr__(self):
         return f"<User Id={self.id}, company-{self.company_id}>"

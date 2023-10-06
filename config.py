@@ -15,6 +15,7 @@ class Config:
     SSL_REDIRECT = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
+    DEFAULT_AVATAR_PATH = basedir + "/web_app/static/profile_photos/without_avatar.jpg"
 
     @staticmethod
     def init_app(app):
