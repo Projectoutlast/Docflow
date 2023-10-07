@@ -16,6 +16,8 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
     DEFAULT_AVATAR_PATH = basedir + "/web_app/static/profile_photos/without_avatar.jpg"
+    PROFILE_PHOTO_FOLDER_PATH = f"{basedir}/web_app/static/profile_photos/"
+    ALLOWED_UPLOAD_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
     @staticmethod
     def init_app(app):

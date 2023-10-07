@@ -3,6 +3,7 @@ import pathlib
 
 import sqlalchemy.exc
 
+from config import Config
 from web_app import db
 from web_app.enums import ActivityStatus, TypeOfActivity
 from web_app.models import CallActivity, MeetingActivity, TaskActivity
@@ -75,3 +76,7 @@ def delete_data_from_exact_folder(path: pathlib.Path) -> None:
     for file in path.iterdir():
         file.unlink()
     return
+
+
+def check_extension_file(filename: str) -> bool:
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in Config.ALLOWED_UPLOAD_EXTENSIONS

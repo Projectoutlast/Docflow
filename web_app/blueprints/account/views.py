@@ -1,16 +1,14 @@
-import pathlib
-
 import sqlalchemy.exc
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 
-from config import basedir
+from config import Config
 from web_app import db
 from web_app.blueprints.account.forms import ChangePassword, EditData, EditPhoto
 from web_app.models import Company, Employee
-from web_app.utils.utilities import get_path_to_profile_photo
+from web_app.utils.utilities import check_extension_file, get_path_to_profile_photo
 
 
 blueprint = Blueprint("settings", __name__)
@@ -24,7 +22,7 @@ def user_settings():
     return render_template("account/employee_data.html", employee=employee, company=company)
 
 
-@blueprint.route("/user/edit", methods=["GET", "POSt"])
+@blueprint.route("/user/edit", methods=["GET", "POST"])
 @login_required
 def user_edit_information():
     employee = Employee.query.filter(Employee.id == current_user.id).first()
@@ -66,10 +64,13 @@ def user_edit_photo_process():
     if form.validate_on_submit():
         file = form.photo.data
         filename = secure_filename(file.filename)
-        file_path = get_path_to_profile_photo(
-            f"{basedir}/web_app/static/profile_photos/{current_user.id}") + f"/{filename}"
-        file.save(file_path)
 
+        if not check_extension_file(filename):
+            flash("Invalid file format", "warning")
+            return redirect(request.referrer)
+
+        file_path = get_path_to_profile_photo(f"{Config.PROFILE_PHOTO_FOLDER_PATH}{current_user.id}") + f"/{filename}"
+        file.save(file_path)
         employee.profile_photo = file_path
 
         try:
@@ -78,7 +79,6 @@ def user_edit_photo_process():
         except sqlalchemy.exc.IntegrityError:
             db.session.rollback()
             flash("Invalid data was passed, try again!", "danger")
-
     return redirect(url_for("settings.user_edit_information"))
 
 
@@ -87,5 +87,15 @@ def user_edit_photo_process():
 def user_change_password():
     form = ChangePassword()
     if form.validate_on_submit():
-        pass
+        employee = Employee.query.filter(Employee.id == current_user.id).first()
+        if employee and employee.check_password_hash(form.current_password.data):
+            try:
+                employee.generate_password_hash(form.new_password.data)
+                db.session.commit()
+                flash("Password successfully updated!", "success")
+                return redirect(url_for("settings.user_settings"))
+            except sqlalchemy.exc.IntegrityError:
+                db.session.rollback()
+                flash("Invalid data was passed, try again!", "danger")
+        flash("Incorrect current password", "warning")
     return render_template("account/change_password.html", form=form)
