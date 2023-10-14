@@ -1,23 +1,26 @@
 import os
 import pathlib as pt
+import secrets
 
 basedir = str(pt.Path.cwd())
 
 
 class Config:
+    ALLOWED_UPLOAD_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+    DEFAULT_AVATAR_PATH = basedir + "/web_app/static/profile_photos/without_avatar.jpg"
+    MAIL_SERVER = "smtp.googlemail.com"
+    MAIL_PORT = 465
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = True
+    MAIL_DEBUG = False
+    MAIL_USERNAME = "app.docflow@gmail.com"
+    MAIL_PASSWORD = "crdkazldbdiafeox"
+    PROFILE_PHOTO_FOLDER_PATH = f"{basedir}/web_app/static/profile_photos/"
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
-    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
-    MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
-    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in \
-        ['true', 'on', '1']
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    SECURITY_PASSWORD_SALT = secrets.token_urlsafe(64)
     SSL_REDIRECT = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
-    DEFAULT_AVATAR_PATH = basedir + "/web_app/static/profile_photos/without_avatar.jpg"
-    PROFILE_PHOTO_FOLDER_PATH = f"{basedir}/web_app/static/profile_photos/"
-    ALLOWED_UPLOAD_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
     @staticmethod
     def init_app(app):

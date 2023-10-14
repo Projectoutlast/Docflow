@@ -1,10 +1,14 @@
+import datetime
+
 import sqlalchemy.exc
 from flask import Blueprint, flash, redirect, render_template, request, url_for
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 from web_app import db
 from web_app.models import Company, Employee
 from web_app.blueprints.registration.forms import CompanyRegisterForm, EmployeeRegisterForm
+from web_app.utils.send_email import send_email
+from web_app.utils.token import confirm_token, generate_token
 
 blueprint = Blueprint('registration', __name__)
 
@@ -51,6 +55,12 @@ def registration_employee():
             db.session.add(employee)
             db.session.commit()
 
+            token = generate_token(employee.email)
+            confirm_url = url_for("registration.confirm_email", token=token, _external=True)
+            html = render_template("confirm_email.html", confirm_url=confirm_url)
+            subject = "Please confirm your email"
+            send_email(employee.email, subject, html)
+
             flash("Your register complete. Please confirm email!", "success")
             return redirect(url_for("login.login"))
         except sqlalchemy.exc.IntegrityError:
@@ -58,3 +68,22 @@ def registration_employee():
             flash("User with this email is already exist", "danger")
             return render_template('registration/employee.html', form=form), 409
     return render_template('registration/employee.html', form=form)
+
+
+@blueprint.route("/confirm/<token>")
+@login_required
+def confirm_email(token: str):
+    if current_user.is_confirmed:
+        flash("Account already confirmed.", "success")
+        return redirect(url_for("work.home_workspace"))
+    email = confirm_token(token)
+    employee = Employee.query.filter(Employee.id == current_user.id).first_or_404()
+    if employee.email == email:
+        employee.is_confirmed = True
+        employee.confirmed_on = datetime.datetime.now()
+        db.session.add(employee)
+        db.session.commit()
+        flash("You have confirmed your account! Thanks", "success")
+    else:
+        flash("The confirmation link is invalid or has expired.", "danger")
+    return redirect(url_for("work.home_workspace"))

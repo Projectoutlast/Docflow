@@ -45,6 +45,8 @@ class Employee(db.Model, UserMixin):
     position = db.Column(db.String, nullable=False, default="manager")
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
+    is_confirmed = db.Column(db.Boolean, nullable=False, default=False)
+    confirmed_on = db.Column(db.DateTime, nullable=True)
     profile_photo = db.Column(db.String, default=Config.DEFAULT_AVATAR_PATH)
 
     def __repr__(self):
