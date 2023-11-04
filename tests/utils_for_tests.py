@@ -35,10 +35,17 @@ def generate_new_employee() -> None:
     Generate thirty new employees. Ten employees for each company.
     """
     result = []
-    entity = Employee(company_id=2, first_name="John",  # type: ignore
-                      last_name="Due", email="john@example.com", password="123456")  # type: ignore
-    entity.generate_password_hash(entity.password)
-    result.append(entity)
+    confirmed_entity = Employee(company_id=2, first_name="John",  # type: ignore
+                                last_name="Due", email="john@example.com",  # type: ignore
+                                password="123456", is_confirmed=True,  # type: ignore
+                                confirmed_on=datetime.datetime.now())  # type: ignore
+    unconfirmed_entity = Employee(company_id=2, first_name="Tomas",  # type: ignore
+                                  last_name="Andersen", email="tom@example.com",  # type: ignore
+                                  password="123456",  # type: ignore
+                                  confirmed_on=datetime.datetime.now())  # type: ignore
+    confirmed_entity.generate_password_hash(confirmed_entity.password)
+    unconfirmed_entity.generate_password_hash(unconfirmed_entity.password)
+    result.append(confirmed_entity)
     for i in range(3):
         for _ in range(10):
             entity = Employee(company_id=1 + i, first_name=fake.first_name(),  # type: ignore
@@ -47,6 +54,8 @@ def generate_new_employee() -> None:
             result.append(entity)
     try:
         db.session.add_all(result)
+        db.session.commit()
+        db.session.add(unconfirmed_entity)
         db.session.commit()
     except sqlalchemy.exc.IntegrityError:
         db.session.rollback()

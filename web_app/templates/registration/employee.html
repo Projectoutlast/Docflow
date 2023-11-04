@@ -70,6 +70,7 @@
     {% endfor %}
     {% endif %}
     <br>
+
     {{ form.submit(type="submit", class="btn btn-outline-warning btn-sm", text="Register") }}
     <a href="{{ url_for('main.index') }}" class="btn btn-outline-light btn-sm">Home</a>
     <p class="text-center mt-3">Already registered? <a href="{{ url_for('login.login') }}">Login now</a></p>

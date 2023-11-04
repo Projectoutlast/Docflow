@@ -5,7 +5,7 @@ from argon2.exceptions import VerifyMismatchError
 from flask_login import UserMixin
 
 from config import Config
-from web_app.enums import ActivityStatus, TypeOfActivity
+from web_app.enums import ActivityStatus, Roles, TypeOfActivity
 from web_app import db
 
 password_hasher = PasswordHasher()
@@ -18,7 +18,6 @@ class Company(db.Model):
     company_name = db.Column(db.String, nullable=False)
     tax_id_number = db.Column(db.Integer, unique=True, nullable=False)
     company_email = db.Column(db.String, unique=True, nullable=False)
-    is_confirm = db.Column(db.Boolean, nullable=False, default=False)
 
     def __repr__(self):
         return f"<Company name {self.company_name}, email {self.company_email}>"
@@ -42,7 +41,7 @@ class Employee(db.Model, UserMixin):
     department_id = db.Column(db.Integer, db.ForeignKey("departments.id"), nullable=True, default=None)
     first_name = db.Column(db.String, nullable=False)
     last_name = db.Column(db.String, nullable=False)
-    position = db.Column(db.String, nullable=False, default="manager")
+    roles = db.Column(db.Enum(Roles), default=Roles.MANAGER, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
     is_confirmed = db.Column(db.Boolean, nullable=False, default=False)

@@ -12,13 +12,23 @@ from web_app.models import CallActivity, Employee, MeetingActivity, TaskActivity
 from web_app.blueprints.work.activity.forms import (combine_date_time, get_all_executors, get_executor,
                                                     ActivityCall, ActivityCallEdit, ActivityMeeting,
                                                     ActivityMeetingEdit, ActivityTask, ActivityTaskEdit)
-from web_app.utils.utilities import check_overdue_activities, get_activity
+from web_app.utils.utilities import check_overdue_activities, email_confirm, get_activity
 
 
 blueprint = Blueprint("work", __name__)
 
 
+@blueprint.route("/unconfirmed-workspace", methods=["GET"])
+@login_required
+def unconfirmed_workspace():
+    if current_user.is_confirmed:
+        flash("Account already confirmed.", "success")
+        return redirect(url_for("work.home_workspace"))
+    return render_template("work/home_unconfirmed_page.html")
+
+
 @blueprint.route("/workspace", methods=["GET", "POST"])
+@email_confirm
 @login_required
 def home_workspace():
     user_name = Employee.query.filter(Employee.id == current_user.id).first()
@@ -26,6 +36,7 @@ def home_workspace():
 
 
 @blueprint.route("/activities/all", methods=["GET"])
+@email_confirm
 @login_required
 def activities_all():
 
@@ -48,6 +59,7 @@ def activities_all():
 
 
 @blueprint.route("/activities/new/call", methods=["GET", "POST"])
+@email_confirm
 @login_required
 def activities_new_call():
     form = ActivityCall(request.form)
@@ -77,6 +89,7 @@ def activities_new_call():
 
 
 @blueprint.route("/activities/new/meeting", methods=["GET", "POST"])
+@email_confirm
 @login_required
 def activities_new_meeting():
     form = ActivityMeeting(request.form)
@@ -107,6 +120,7 @@ def activities_new_meeting():
 
 
 @blueprint.route("/activities/new/task", methods=["GET", "POST"])
+@email_confirm
 @login_required
 def activities_new_task():
     form = ActivityTask(request.form)
@@ -137,6 +151,7 @@ def activities_new_task():
 
 
 @blueprint.route("/activities/complete/<string:activity_type>/<int:activity_id>", methods=["POST", "GET"])
+@email_confirm
 @login_required
 def activities_complete_process(activity_type: str, activity_id: int):
     entity = get_activity(activity_type, activity_id)
@@ -163,6 +178,7 @@ def activities_complete_process(activity_type: str, activity_id: int):
 
 
 @blueprint.route("/activities/completed/all", methods=["GET"])
+@email_confirm
 @login_required
 def activities_completed_all():
     all_calls = CallActivity.query.filter(CallActivity.activity_holder == current_user.id,
@@ -176,6 +192,7 @@ def activities_completed_all():
 
 
 @blueprint.route("/activities/overdue/all", methods=["GET"])
+@email_confirm
 @login_required
 def activities_overdue_all():
     all_calls = CallActivity.query.filter(CallActivity.activity_holder == current_user.id,
@@ -189,6 +206,7 @@ def activities_overdue_all():
 
 
 @blueprint.route("/activities/cancel/<string:activity_type>/<int:activity_id>", methods=["POST", "GET"])
+@email_confirm
 @login_required
 def activities_cancel(activity_type: str, activity_id: int):
     entity = get_activity(activity_type, activity_id)
@@ -214,12 +232,14 @@ def activities_cancel(activity_type: str, activity_id: int):
 
 
 @blueprint.route("/activities/extend-date/<int:activities_id>", methods=["POST", "GET"])
+@email_confirm
 @login_required
 def activities_extend(activities_id: int):
     return redirect(url_for("work.activities_all"))
 
 
 @blueprint.route("/activities/<string:activity_type>/<int:activity_id>/info", methods=["GET", "POST"])
+@email_confirm
 @login_required
 def get_activity_info(activity_type: str, activity_id: int):
     activity = get_activity(activity_type, activity_id)
@@ -230,6 +250,7 @@ def get_activity_info(activity_type: str, activity_id: int):
 
 
 @blueprint.route("/activities/task/<int:activity_id>/edit", methods=["GET", "POST"])
+@email_confirm
 @login_required
 def activity_task_edit(activity_id: int):
     activity = get_activity(TypeOfActivity.TASK.value, activity_id)
@@ -247,6 +268,7 @@ def activity_task_edit(activity_id: int):
 
 
 @blueprint.route("/activities/task/<int:activity_id>/update", methods=["POST"])
+@email_confirm
 @login_required
 def activity_task_update(activity_id: int):
     activity = get_activity(TypeOfActivity.TASK.value, activity_id)
@@ -272,6 +294,7 @@ def activity_task_update(activity_id: int):
 
 
 @blueprint.route("/activities/call/<int:activity_id>/edit", methods=["GET", "POST"])
+@email_confirm
 @login_required
 def activity_call_edit(activity_id: int):
     activity = get_activity(TypeOfActivity.CALL.value, activity_id)
@@ -289,6 +312,7 @@ def activity_call_edit(activity_id: int):
 
 
 @blueprint.route("/activities/call/<int:activity_id>/update", methods=["POST"])
+@email_confirm
 @login_required
 def activity_call_update(activity_id: int):
     activity = get_activity(TypeOfActivity.CALL.value, activity_id)
@@ -313,6 +337,7 @@ def activity_call_update(activity_id: int):
 
 
 @blueprint.route("/activities/meeting/<int:activity_id>/edit", methods=["GET", "POST"])
+@email_confirm
 @login_required
 def activity_meeting_edit(activity_id: int):
     activity = get_activity(TypeOfActivity.MEETING.value, activity_id)
@@ -331,6 +356,7 @@ def activity_meeting_edit(activity_id: int):
 
 
 @blueprint.route("/activities/meeting/<int:activity_id>/update", methods=["POST"])
+@email_confirm
 @login_required
 def activity_meeting_update(activity_id: int):
     activity = get_activity(TypeOfActivity.MEETING.value, activity_id)

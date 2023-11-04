@@ -5,8 +5,9 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from web_app import db
-from web_app.models import Company, Employee
 from web_app.blueprints.registration.forms import CompanyRegisterForm, EmployeeRegisterForm
+from web_app.enums import Roles
+from web_app.models import Company, Employee
 from web_app.utils.send_email import send_email
 from web_app.utils.token import confirm_token, generate_token
 
@@ -20,18 +21,32 @@ def registration_company():
     form = CompanyRegisterForm(request.form)
     if form.validate_on_submit():
         try:
-            company = Company(company_name=form.name.data,
+            company = Company(company_name=form.name_of_company.data,
                               tax_id_number=form.tax_id_number.data,
                               company_email=form.email.data)
-            db.session.add(company)
+            employee = Employee(company_id=company.id,  # type: ignore
+                                first_name=form.first_name.data,  # type: ignore
+                                last_name=form.last_name.data,  # type: ignore
+                                roles=Roles.HEAD_OF_COMPANY,  # type: ignore
+                                email=form.email.data,  # type: ignore
+                                password=form.password.data)  # type: ignore
+            employee.generate_password_hash(employee.password)
+            db.session.add_all([company, employee])
             db.session.commit()
+
+            token = generate_token(employee.email)
+            confirm_url = url_for("registration.confirm_email", token=token, _external=True)
+            html = render_template("confirm_email.html", confirm_url=confirm_url)
+            subject = "Please confirm your email"
+            send_email(employee.email, subject, html)
+
         except sqlalchemy.exc.IntegrityError:
             db.session.rollback()
             flash("This email or tax Id number is already exist", "danger")
             return render_template('registration/company.html', form=form), 409
 
         flash("Your company registered. Please confirm your email", "message")
-        return redirect(url_for("main.index"))
+        return redirect(url_for("login.login"))
     return render_template('registration/company.html', form=form)
 
 
@@ -68,6 +83,25 @@ def registration_employee():
             flash("User with this email is already exist", "danger")
             return render_template('registration/employee.html', form=form), 409
     return render_template('registration/employee.html', form=form)
+
+
+@blueprint.route("/send/confirmation-email")
+@login_required
+def send_confirmation_email_again():
+
+    if current_user.is_confirmed:
+        flash("Account already confirmed.", "success")
+        return redirect(url_for("work.home_workspace"))
+
+    employee = Employee.query.filter(Employee.id == current_user.id).first_or_404()
+    token = generate_token(employee.email)
+    confirm_url = url_for("registration.confirm_email", token=token, _external=True)
+    html = render_template("confirm_email.html", confirm_url=confirm_url)
+    subject = "Please confirm your email"
+    send_email(employee.email, subject, html)
+    flash("A confirmation message was sent again", "message")
+
+    return redirect(url_for("work.unconfirmed_workspace"))
 
 
 @blueprint.route("/confirm/<token>")

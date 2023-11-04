@@ -10,14 +10,18 @@ blueprint = Blueprint('login', __name__)
 
 @blueprint.route('/login', methods=['GET', 'POST'])
 def login():
+
     if current_user.is_authenticated:
-        return redirect(url_for("work.home_workspace"))
+        if current_user.is_confirmed:
+            return redirect(url_for("work.home_workspace"))
+        return redirect(url_for("work.unconfirmed_workspace"))
+
     form = LoginForm(request.form)
     if form.validate_on_submit():
         employee = Employee.query.filter(Employee.email == form.email.data).first()
         if employee and employee.check_password_hash(form.password.data):
             login_user(employee)
-            return redirect(url_for("work.home_workspace"))
+            return redirect(url_for("work.unconfirmed_workspace"))
         else:
             flash("Invalid email or password", "danger")
             return render_template("login.html", form=form), 401

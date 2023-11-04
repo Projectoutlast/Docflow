@@ -1,12 +1,16 @@
 import datetime
 import pathlib
 
+from flask import current_app, flash, redirect, url_for
+from flask_login import current_user
+from functools import wraps
+
 import sqlalchemy.exc
 
 from config import Config
 from web_app import db
 from web_app.enums import ActivityStatus, TypeOfActivity
-from web_app.models import CallActivity, MeetingActivity, TaskActivity
+from web_app.models import CallActivity, Employee, MeetingActivity, TaskActivity
 
 
 def check_overdue_activities(user_id: int) -> None:
@@ -80,3 +84,23 @@ def delete_data_from_exact_folder(path: pathlib.Path) -> None:
 
 def check_extension_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in Config.ALLOWED_UPLOAD_EXTENSIONS
+
+
+def email_confirm(func):
+    """
+     The function checks if the user's email address is not verified and is redirected
+     to a page with limited functionality.
+    """
+
+    @wraps(func)
+    def decorated_view(*args, **kwargs):
+
+        if not current_user.is_confirmed:
+            flash("Your email address isn't verified")
+            return redirect(url_for("work.unconfirmed_workspace"))
+
+        if callable(getattr(current_app, "ensure_sync", None)):
+            return current_app.ensure_sync(func)(*args, **kwargs)
+        return func(*args, **kwargs)
+
+    return decorated_view

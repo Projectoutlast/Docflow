@@ -35,3 +35,20 @@ def test_login(test_client):
     response = test_client.get("/logout", follow_redirects=True)
     assert response.status_code == 200
     assert b"Log in" in response.data
+
+
+def test_unconfirmed_email_user(test_auth_unconfirmed_email_client):
+    """
+    GET a Flask application
+    WHEN the user with an unconfirmed email is logged in
+    THEN check that the response is valid / invalid
+    """
+
+    response = test_auth_unconfirmed_email_client.get("/unconfirmed-workspace", follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b"Your email address has not yet been" in response.data
+
+    response = test_auth_unconfirmed_email_client.get("/workspace", follow_redirects=True)
+
+    assert b"Your email address has not yet been" in response.data

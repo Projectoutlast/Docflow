@@ -5,10 +5,21 @@
 
     {{ form.csrf_token }}
 
-    {{ form.name(placeholder="Company name", class="form-control") }}
-    {% if form.name.errors %}
+    {{ form.first_name(placeholder="First name", class="form-control") }}
+    {% if form.first_name.errors %}
     <br>
-    {% for error in form.name.errors %}
+    {% for error in form.first_name.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    <br>
+
+    {{ form.last_name(placeholder="Last name", class="form-control") }}
+    {% if form.last_name.errors %}
+    <br>
+    {% for error in form.last_name.errors %}
     <div class="alert alert-danger" role="alert">
         {{ error }}
     </div>
@@ -27,10 +38,44 @@
     {% endif %}
     <br>
 
+    {{ form.name_of_company(placeholder="Company name", class="form-control") }}
+    {% if form.name_of_company.errors %}
+    <br>
+    {% for error in form.name_of_company.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    <br>
+
     {{ form.tax_id_number(placeholder="Tax identification number", class="form-control") }}
     {% if form.tax_id_number.errors %}
     <br>
     {% for error in form.tax_id_number.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    <br>
+
+
+    {{ form.password(placeholder="Password", class="form-control") }}
+    {% if form.password.errors %}
+    <br>
+    {% for error in form.password.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    <br>
+
+    {{ form.confirm(placeholder="Repeat password", class="form-control") }}
+    {% if form.confirm.errors %}
+    <br>
+    {% for error in form.confirm.errors %}
     <div class="alert alert-danger" role="alert">
         {{ error }}
     </div>
