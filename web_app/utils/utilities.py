@@ -10,7 +10,7 @@ import sqlalchemy.exc
 from config import Config
 from web_app import db
 from web_app.enums import ActivityStatus, TypeOfActivity
-from web_app.models import CallActivity, Employee, MeetingActivity, TaskActivity
+from web_app.models import CallActivity, MeetingActivity, TaskActivity
 
 
 def check_overdue_activities(user_id: int) -> None:
