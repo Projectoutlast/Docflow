@@ -1,6 +1,7 @@
 import os
 import pathlib as pt
 import secrets
+import string
 
 basedir = str(pt.Path.cwd())
 
@@ -16,6 +17,8 @@ class Config:
     MAIL_USERNAME = "app.docflow@gmail.com"
     MAIL_PASSWORD = "crdkazldbdiafeox"
     PROFILE_PHOTO_FOLDER_PATH = f"{basedir}/web_app/static/profile_photos/"
+    PWD_LENGTH = 12
+    PWD_GENERATE_ALPHABET = string.ascii_letters + string.digits + string.punctuation
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
     SECURITY_PASSWORD_SALT = secrets.token_urlsafe(64)
     SSL_REDIRECT = False

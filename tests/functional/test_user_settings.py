@@ -60,7 +60,7 @@ def test_edit_user_data_process(test_auth_client):
     employee_after_change = Employee.query.filter(Employee.id == current_user.id).first()
 
     assert response.status_code == 200
-    assert b"Profile successfully updated!" in response.data
+    assert b"and we sent confirmation email on the" in response.data
     assert employee_first_name_before_change != employee_after_change.first_name
     assert employee_last_name_before_change != employee_after_change.last_name
     assert employee_email_before_change != employee_after_change.email

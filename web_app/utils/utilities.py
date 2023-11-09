@@ -1,5 +1,6 @@
 import datetime
 import pathlib
+import secrets
 
 from flask import current_app, flash, redirect, url_for
 from flask_login import current_user
@@ -76,7 +77,9 @@ def get_path_to_profile_photo(path: str) -> str:
 
 
 def delete_data_from_exact_folder(path: pathlib.Path) -> None:
-    """Get path to directory and clear that one"""
+    """
+    Get path to directory and clear that one
+    """
     for file in path.iterdir():
         file.unlink()
     return
@@ -104,3 +107,13 @@ def email_confirm(func):
         return func(*args, **kwargs)
 
     return decorated_view
+
+
+def generate_new_password(pwd_length: int = Config.PWD_LENGTH) -> str:
+    """
+    Generate a new password for the user who resets his password
+    """
+    result = ""
+    for i in range(pwd_length):
+        result += "".join(secrets.choice(Config.PWD_GENERATE_ALPHABET))
+    return result

@@ -8,6 +8,7 @@ from config import Config
 from web_app import db
 from web_app.blueprints.account.forms import ChangePassword, EditData, EditPhoto
 from web_app.models import Company, Employee
+from web_app.utils.send_email import generate_and_send_confirmation_token
 from web_app.utils.utilities import check_extension_file, get_path_to_profile_photo
 
 
@@ -43,10 +44,20 @@ def user_edit_data_process():
     if form.validate_on_submit():
         employee.first_name = form.first_name.data
         employee.last_name = form.last_name.data
-        employee.email = form.email.data
+        if employee.email != form.email.data:
+            employee.email = form.email.data
+            employee.is_confirmed = False
+
         try:
             db.session.commit()
-            flash("Profile successfully updated!", "success")
+
+            generate_and_send_confirmation_token(employee.email)
+
+            if employee != form.email.data:
+                flash("Profile successfully updated"
+                      "and we sent confirmation email on the new address. Please, confirm it", "success")
+            else:
+                flash("Profile successfully updated!", "success")
             return redirect(url_for("settings.user_settings"))
         except sqlalchemy.exc.IntegrityError:
             db.session.rollback()
