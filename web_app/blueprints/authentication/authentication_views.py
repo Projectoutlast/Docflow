@@ -41,20 +41,16 @@ def reset_user_password():
         if employee:
             new_password = generate_new_password()
             employee.generate_password_hash(new_password)
-            try:
-                db.session.commit()
 
-                url = url_for("login.login", _external=True)
-                render_html = render_template("reset_password_email.html", password=new_password, url=url)
-                subject = "Reset password"
-                send_email(employee.email, subject, render_html)
+            db.session.commit()
 
-                flash("The message with the new password was sent to your address.", "success")
-                return redirect(url_for("login.login"))
-            except sqlalchemy.exc.IntegrityError:
-                db.session.rollback()
-                flash("During the sending of data, something went wrong. Please try again.", "danger")
-                return render_template("reset_password.html", form=form), 409
+            url = url_for("login.login", _external=True)
+            render_html = render_template("reset_password_email.html", password=new_password, url=url)
+            subject = "Reset password"
+            send_email(employee.email, subject, render_html)
+
+            flash("The message with the new password was sent to your address.", "success")
+            return redirect(url_for("login.login"))
         flash(f"The user with {form.email.data} address was not found.", "warning")
     return render_template("reset_password.html", form=form)
 

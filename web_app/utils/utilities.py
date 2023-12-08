@@ -39,15 +39,13 @@ def check_overdue_activities(user_id: int) -> None:
         one_task.status = ActivityStatus.OVERDUE
         result.append(one_task)
 
-    try:
-        db.session.add_all(result)
-        db.session.commit()
-    except sqlalchemy.exc.IntegrityError:
-        db.session.rollback()
+    db.session.add_all(result)
+    db.session.commit()
+
     return None
 
 
-def get_activity(activity_type: str, activity_id: int) -> db.Model | None:
+def get_activity(activity_type: str, activity_id: int) -> db.Model:
     """
     Get activity type, id and return db.Model activity
     """
@@ -59,8 +57,6 @@ def get_activity(activity_type: str, activity_id: int) -> db.Model | None:
             return MeetingActivity.query.filter(MeetingActivity.id == activity_id).first()
         case TypeOfActivity.TASK.value:
             return TaskActivity.query.filter(TaskActivity.id == activity_id).first()
-
-    return None
 
 
 def get_path_to_profile_photo(path: str) -> str:

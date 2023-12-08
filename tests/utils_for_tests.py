@@ -106,11 +106,9 @@ def generate_activities() -> None:
                                                                       random.randint(0, 59),
                                                                       random.randint(0, 59))))
         result.extend([call_entity, meeting_entity, task_entity])
-    try:
-        db.session.add_all(result)
-        db.session.commit()
-    except sqlalchemy.exc.IntegrityError:
-        db.session.rollback()
+
+    db.session.add_all(result)
+    db.session.commit()
     return None
 
 
@@ -158,11 +156,9 @@ def generate_activities_for_current_user() -> None:
                                                                       random.randint(0, 59),
                                                                       random.randint(0, 59))))
         result.extend([call_entity, meeting_entity, task_entity])
-    try:
-        db.session.add_all(result)
-        db.session.commit()
-    except sqlalchemy.exc.IntegrityError:
-        db.session.rollback()
+
+    db.session.add_all(result)
+    db.session.commit()
     return None
 
 
@@ -208,9 +204,7 @@ def generate_overdue_activities() -> None:
                                                                       random.randint(0, 59),
                                                                       random.randint(0, 59))))
         result.extend([call_entity, meeting_entity, task_entity])
-    try:
-        db.session.add_all(result)
-        db.session.commit()
-    except sqlalchemy.exc.IntegrityError:
-        db.session.rollback()
+
+    db.session.add_all(result)
+    db.session.commit()
     return None

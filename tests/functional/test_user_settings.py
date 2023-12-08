@@ -47,8 +47,8 @@ def test_edit_user_data_process(test_auth_client):
     employee_last_name_before_change = employee.last_name
     employee_email_before_change = employee.email
 
-    invalid_payload = {"first_name": "Jack", "last_name": "Sparrow"}
-    response = test_auth_client.post("/user/edit/data", data=invalid_payload, follow_redirects=True)
+    payload = {"first_name": "Jack", "last_name": "Sparrow"}
+    response = test_auth_client.post("/user/edit/data", data=payload, follow_redirects=True)
 
     for item in [employee.first_name, employee.last_name, employee.email]:
         assert bytes(item, "utf-8") in response.data
@@ -117,3 +117,23 @@ def test_user_upload_profile_photo(test_auth_client):
 
     assert response.status_code == 200
     assert employee.profile_photo != Config.DEFAULT_AVATAR_PATH
+
+
+def test_forgot_the_password(test_client):
+    """
+    GIVEN a Flask application
+    WHEN the '/login/reset-pwd' is requested (POST, GET)
+    THEN check that the responses is valid / invalid, form works correct, sending confirmation-email
+    """
+
+    response = test_client.get("/login/reset-pwd", follow_redirects=True)
+    assert response.status_code == 200
+    assert b"Reset" in response.data
+
+    payload = {"email": "nothing_is_here@example.com"}
+    response = test_client.post("/login/reset-pwd", data=payload, follow_redirects=True)
+    assert b"The user with nothing_is_here@example.com address was not found." in response.data
+
+    payload = {"email": "john@example.com"}
+    response = test_client.post("/login/reset-pwd", data=payload, follow_redirects=True)
+    assert b"The message with the new password was sent to your address." in response.data

@@ -68,23 +68,18 @@ def activities_new_call():
         employee = Employee.query.filter(Employee.id == current_user.id).first()
         executor = Employee.query.filter(Employee.id == get_executor(form)).first()
         if employee:
-            try:
-                new_call = CallActivity(company_id=employee.company_id,
-                                        to_whom=form.to_whom.data,
-                                        activity_holder=current_user.id,
-                                        activity_holder_name=f"{employee.first_name} {employee.last_name}",
-                                        executor=get_executor(form),
-                                        executor_name=f"{executor.first_name} {executor.last_name}",
-                                        finish_until=combine_date_time(form.when_date.data, form.when_time.data))
-                db.session.add(new_call)
-                db.session.commit()
+            new_call = CallActivity(company_id=employee.company_id,
+                                    to_whom=form.to_whom.data,
+                                    activity_holder=current_user.id,
+                                    activity_holder_name=f"{employee.first_name} {employee.last_name}",
+                                    executor=get_executor(form),
+                                    executor_name=f"{executor.first_name} {executor.last_name}",
+                                    finish_until=combine_date_time(form.when_date.data, form.when_time.data))
+            db.session.add(new_call)
+            db.session.commit()
 
-                flash("A new activity Call was created!", "success")
-                return redirect(url_for("work.activities_all"))
-            except sqlalchemy.exc.IntegrityError:
-                db.session.rollback()
-                flash("Invalid data was passed, try again!", "danger")
-                return render_template("work/activities_new_call.html", form=form), 500
+            flash("A new activity Call was created!", "success")
+            return redirect(url_for("work.activities_all"))
     return render_template("work/activities_new_call.html", form=form)
 
 
@@ -98,24 +93,19 @@ def activities_new_meeting():
         employee = Employee.query.filter(Employee.id == current_user.id).first()
         executor = Employee.query.filter(Employee.id == get_executor(form)).first()
         if employee:
-            try:
-                new_meeting = MeetingActivity(company_id=employee.company_id,
-                                              activity_holder=current_user.id,
-                                              activity_holder_name=f"{employee.first_name} {employee.last_name}",
-                                              with_whom=form.with_whom.data,
-                                              location=form.location.data,
-                                              executor=get_executor(form),
-                                              executor_name=f"{executor.first_name} {executor.last_name}",
-                                              finish_until=combine_date_time(form.when_date.data, form.when_time.data))
-                db.session.add(new_meeting)
-                db.session.commit()
+            new_meeting = MeetingActivity(company_id=employee.company_id,
+                                          activity_holder=current_user.id,
+                                          activity_holder_name=f"{employee.first_name} {employee.last_name}",
+                                          with_whom=form.with_whom.data,
+                                          location=form.location.data,
+                                          executor=get_executor(form),
+                                          executor_name=f"{executor.first_name} {executor.last_name}",
+                                          finish_until=combine_date_time(form.when_date.data, form.when_time.data))
+            db.session.add(new_meeting)
+            db.session.commit()
 
-                flash("A new activity Meeting was created!", "success")
-                return redirect(url_for("work.activities_all"))
-            except sqlalchemy.exc.IntegrityError:
-                db.session.rollback()
-                flash("Invalid data was passed, try again!", "danger")
-                return render_template("work/activities_new_meeting.html", form=form), 500
+            flash("A new activity Meeting was created!", "success")
+            return redirect(url_for("work.activities_all"))
     return render_template("work/activities_new_meeting.html", form=form)
 
 
@@ -129,24 +119,19 @@ def activities_new_task():
         employee = Employee.query.filter(Employee.id == current_user.id).first()
         executor = Employee.query.filter(Employee.id == get_executor(form)).first()
         if employee:
-            try:
-                new_meeting = TaskActivity(company_id=employee.company_id,
-                                           subject=form.subject.data,
-                                           describe=form.describe.data,
-                                           activity_holder=current_user.id,
-                                           activity_holder_name=f"{employee.first_name} {employee.last_name}",
-                                           executor=get_executor(form),
-                                           executor_name=f"{executor.first_name} {executor.last_name}",
-                                           finish_until=combine_date_time(form.when_date.data, form.when_time.data))
-                db.session.add(new_meeting)
-                db.session.commit()
+            new_meeting = TaskActivity(company_id=employee.company_id,
+                                       subject=form.subject.data,
+                                       describe=form.describe.data,
+                                       activity_holder=current_user.id,
+                                       activity_holder_name=f"{employee.first_name} {employee.last_name}",
+                                       executor=get_executor(form),
+                                       executor_name=f"{executor.first_name} {executor.last_name}",
+                                       finish_until=combine_date_time(form.when_date.data, form.when_time.data))
+            db.session.add(new_meeting)
+            db.session.commit()
 
-                flash("A new activity Task was created!", "success")
-                return redirect(url_for("work.activities_all"))
-            except sqlalchemy.exc.IntegrityError:
-                db.session.rollback()
-                flash("Invalid data was passed, try again!", "danger")
-                return render_template("work/activities_new_task.html", form=form), 500
+            flash("A new activity Task was created!", "success")
+            return redirect(url_for("work.activities_all"))
     return render_template("work/activities_new_task.html", form=form)
 
 
@@ -157,14 +142,11 @@ def activities_complete_process(activity_type: str, activity_id: int):
     entity = get_activity(activity_type, activity_id)
     if entity:
         entity.status = ActivityStatus.COMPLETE
-        try:
-            db.session.add(entity)
-            db.session.commit()
 
-            flash("Activity completed", "success")
-        except sqlalchemy.exc.IntegrityError:
-            db.session.rollback()
-            flash("Something went wrong", "danger")
+        db.session.add(entity)
+        db.session.commit()
+
+        flash("Activity completed", "success")
 
         if request.referrer is None:
             return redirect(url_for("work.activities_all"))
@@ -211,14 +193,10 @@ def activities_overdue_all():
 def activities_cancel(activity_type: str, activity_id: int):
     entity = get_activity(activity_type, activity_id)
     if entity:
-        try:
-            db.session.delete(entity)
-            db.session.commit()
+        db.session.delete(entity)
+        db.session.commit()
 
-            flash("Activity successful deleted", "success")
-        except sqlalchemy.exc.IntegrityError:
-            db.session.rollback()
-            flash("Something went wrong", "danger")
+        flash("Activity successful deleted", "success")
 
         if request.referrer is None:
             return redirect(url_for("work.activities_all"))
@@ -281,15 +259,11 @@ def activity_task_update(activity_id: int):
         activity.executor = get_executor(form)
         activity.executor_name = f"{executor.first_name} {executor.last_name}"
         activity.finish_until = combine_date_time(form.when_date.data, form.when_time.data)
-        try:
-            db.session.commit()
 
-            flash("An activity successfully updated!", "success")
-            return redirect(url_for("work.activities_all"))
-        except sqlalchemy.exc.IntegrityError:
-            db.session.rollback()
-            flash("Invalid data was passed, try again!", "danger")
-            return render_template("work/activities_edit.html", form=form), 500
+        db.session.commit()
+
+        flash("An activity successfully updated!", "success")
+        return redirect(url_for("work.activities_all"))
     return redirect(url_for("work.activity_task_edit", activity_id=activity_id, activity=activity))
 
 
@@ -324,15 +298,12 @@ def activity_call_update(activity_id: int):
         activity.executor = get_executor(form)
         activity.executor_name = f"{executor.first_name} {executor.last_name}"
         activity.finish_until = combine_date_time(form.when_date.data, form.when_time.data)
-        try:
-            db.session.commit()
 
-            flash("An activity successfully updated!", "success")
-            return redirect(url_for("work.activities_all"))
-        except sqlalchemy.exc.IntegrityError:
-            db.session.rollback()
-            flash("Invalid data was passed, try again!", "danger")
-            return render_template("work/activities_edit.html", form=form), 500
+        db.session.commit()
+
+        flash("An activity successfully updated!", "success")
+        return redirect(url_for("work.activities_all"))
+
     return redirect(url_for("work.activity_call_edit", activity_id=activity_id, activity=activity))
 
 
@@ -369,13 +340,9 @@ def activity_meeting_update(activity_id: int):
         activity.executor = get_executor(form)
         activity.executor_name = f"{executor.first_name} {executor.last_name}"
         activity.finish_until = combine_date_time(form.when_date.data, form.when_time.data)
-        try:
-            db.session.commit()
 
-            flash("An activity successfully updated!", "success")
-            return redirect(url_for("work.activities_all"))
-        except sqlalchemy.exc.IntegrityError:
-            db.session.rollback()
-            flash("Invalid data was passed, try again!", "danger")
-            return render_template("work/activities_edit.html", form=form), 500
+        db.session.commit()
+
+        flash("An activity successfully updated!", "success")
+        return redirect(url_for("work.activities_all"))
     return redirect(url_for("work.activity_meeting_edit", activity_id=activity_id, activity=activity))

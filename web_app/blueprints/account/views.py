@@ -39,6 +39,7 @@ def user_edit_information():
 @login_required
 def user_edit_data_process():
     employee = Employee.query.filter(Employee.id == current_user.id).first()
+    previous_email = employee.email
     form = EditData()
 
     if form.validate_on_submit():
@@ -47,21 +48,16 @@ def user_edit_data_process():
         if employee.email != form.email.data:
             employee.email = form.email.data
             employee.is_confirmed = False
-
-        try:
-            db.session.commit()
-
             generate_and_send_confirmation_token(employee.email)
 
-            if employee != form.email.data:
-                flash("Profile successfully updated"
-                      "and we sent confirmation email on the new address. Please, confirm it", "success")
-            else:
-                flash("Profile successfully updated!", "success")
-            return redirect(url_for("settings.user_settings"))
-        except sqlalchemy.exc.IntegrityError:
-            db.session.rollback()
-            flash("Invalid data was passed, try again!", "danger")
+        if previous_email != form.email.data:
+
+            flash("Profile successfully updated"
+                  "and we sent confirmation email on the new address. Please, confirm it", "success")
+        else:
+            flash("Profile successfully updated!", "success")
+        db.session.commit()
+        return redirect(url_for("settings.user_settings"))
 
     return redirect(url_for("settings.user_edit_information"))
 
@@ -84,12 +80,8 @@ def user_edit_photo_process():
         file.save(file_path)
         employee.profile_photo = file_path
 
-        try:
-            db.session.commit()
-            flash("Photo successfully updated!", "success")
-        except sqlalchemy.exc.IntegrityError:
-            db.session.rollback()
-            flash("Invalid data was passed, try again!", "danger")
+        db.session.commit()
+        flash("Photo successfully updated!", "success")
     return redirect(url_for("settings.user_edit_information"))
 
 
@@ -100,13 +92,9 @@ def user_change_password():
     if form.validate_on_submit():
         employee = Employee.query.filter(Employee.id == current_user.id).first()
         if employee and employee.check_password_hash(form.current_password.data):
-            try:
-                employee.generate_password_hash(form.new_password.data)
-                db.session.commit()
-                flash("Password successfully updated!", "success")
-                return redirect(url_for("settings.user_settings"))
-            except sqlalchemy.exc.IntegrityError:
-                db.session.rollback()
-                flash("Invalid data was passed, try again!", "danger")
+            employee.generate_password_hash(form.new_password.data)
+            db.session.commit()
+            flash("Password successfully updated!", "success")
+            return redirect(url_for("settings.user_settings"))
         flash("Incorrect current password", "warning")
     return render_template("account/change_password.html", form=form)
